@@ -1,0 +1,39 @@
+networks:
+  default_nw:
+
+services:
+  db:
+    image: postgres:14
+    container_name: my_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user", "-d", "db_app"]
+      interval: 5s
+      timeout: 10s
+      retries: 4
+    networks:
+      - default_nw
+
+  app:
+    build: .
+    container_name: app
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: ".env"
+    entrypoint: ["python", "/app/__init__.py"]
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    networks:
+      - default_nw
+
+volumes:
+  pgdata:

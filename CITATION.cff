@@ -1,0 +1,9 @@
+@misc{augusto2025xchaindatagencrosschaindatasetgeneration,
+      title={XChainDataGen: A Cross-Chain Dataset Generation Framework}, 
+      author={André Augusto and André Vasconcelos and Miguel Correia and Luyao Zhang},
+      year={2025},
+      eprint={2503.13637},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2503.13637}, 
+}

@@ -1,0 +1,2380 @@
+[
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum ContractType",
+                "name": "contractType",
+                "type": "uint8"
+            }
+        ],
+        "name": "ErrContractTypeNotFound",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrERC1155MintingFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrERC20MintingFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrERC721MintingFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrEmptyArray",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "uint256",
+                "name": "actual",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expected",
+                "type": "uint256"
+            }
+        ],
+        "name": "ErrInvalidChainId",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidInfo",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrInvalidOrder",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidPercentage",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidReceipt",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidReceiptKind",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidRequest",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "weight",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "v",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "r",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "s",
+                        "type": "bytes32"
+                    }
+                ],
+                "internalType": "struct SignatureConsumer.Signature",
+                "name": "sig",
+                "type": "tuple"
+            }
+        ],
+        "name": "ErrInvalidSigner",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrInvalidThreshold",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrInvalidTokenStandard",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrLengthMismatch",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrNullHighTierVoteWeightProvided",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrNullMinVoteWeightProvided",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            }
+        ],
+        "name": "ErrNullTotalWeightProvided",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrQueryForApprovedWithdrawal",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrQueryForInsufficientVoteWeight",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrQueryForProcessedWithdrawal",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrReachedDailyWithdrawalLimit",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum TokenStandard",
+                        "name": "erc",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "quantity",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TokenInfo",
+                "name": "tokenInfo",
+                "type": "tuple"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "ErrTokenCouldNotTransfer",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum TokenStandard",
+                        "name": "erc",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "quantity",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TokenInfo",
+                "name": "tokenInfo",
+                "type": "tuple"
+            },
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "ErrTokenCouldNotTransferFrom",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "enum RoleAccess",
+                "name": "expectedRole",
+                "type": "uint8"
+            }
+        ],
+        "name": "ErrUnauthorized",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "msgSig",
+                "type": "bytes4"
+            },
+            {
+                "internalType": "enum ContractType",
+                "name": "expectedContractType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "actual",
+                "type": "address"
+            }
+        ],
+        "name": "ErrUnexpectedInternalCall",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrUnsupportedStandard",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ErrUnsupportedToken",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "ErrZeroCodeContract",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "enum ContractType",
+                "name": "contractType",
+                "type": "uint8"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "ContractUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "tokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "limits",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "DailyWithdrawalLimitsUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "receiptHash",
+                "type": "bytes32"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct Transfer.Receipt",
+                "name": "receipt",
+                "type": "tuple"
+            }
+        ],
+        "name": "DepositRequested",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "tokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "thresholds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "HighTierThresholdsUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "numerator",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "denominator",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "previousNumerator",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "previousDenominator",
+                "type": "uint256"
+            }
+        ],
+        "name": "HighTierVoteWeightThresholdUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "version",
+                "type": "uint8"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "tokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "thresholds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "LockedThresholdsUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "Paused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "previousAdminRole",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "newAdminRole",
+                "type": "bytes32"
+            }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "numerator",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "denominator",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "previousNumerator",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "previousDenominator",
+                "type": "uint256"
+            }
+        ],
+        "name": "ThresholdUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "mainchainTokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "roninTokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum TokenStandard[]",
+                "name": "standards",
+                "type": "uint8[]"
+            }
+        ],
+        "name": "TokenMapped",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "tokens",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "percentages",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "UnlockFeePercentagesUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "Unpaused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "receiptHash",
+                "type": "bytes32"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct Transfer.Receipt",
+                "name": "receipt",
+                "type": "tuple"
+            }
+        ],
+        "name": "WithdrawalLocked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "receiptHash",
+                "type": "bytes32"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct Transfer.Receipt",
+                "name": "receipt",
+                "type": "tuple"
+            }
+        ],
+        "name": "WithdrawalUnlocked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "receiptHash",
+                "type": "bytes32"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct Transfer.Receipt",
+                "name": "receipt",
+                "type": "tuple"
+            }
+        ],
+        "name": "Withdrew",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "contract IWETH",
+                "name": "weth",
+                "type": "address"
+            }
+        ],
+        "name": "WrappedNativeTokenContractUpdated",
+        "type": "event"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "fallback"
+    },
+    {
+        "inputs": [],
+        "name": "DEFAULT_ADMIN_ROLE",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "DOMAIN_SEPARATOR",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "WITHDRAWAL_UNLOCKER_ROLE",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "_MAX_PERCENTAGE",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_voteWeight",
+                "type": "uint256"
+            }
+        ],
+        "name": "checkHighTierVoteWeightThreshold",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_voteWeight",
+                "type": "uint256"
+            }
+        ],
+        "name": "checkThreshold",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "dailyWithdrawalLimit",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "depositCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "emergencyPauser",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum ContractType",
+                "name": "contractType",
+                "type": "uint8"
+            }
+        ],
+        "name": "getContract",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "contract_",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getHighTierVoteWeightThreshold",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getRoleAdmin",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            }
+        ],
+        "name": "getRoleMember",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getRoleMemberCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "mainchainToken",
+                "type": "address"
+            }
+        ],
+        "name": "getRoninToken",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum TokenStandard",
+                        "name": "erc",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenAddr",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct MappedTokenConsumer.MappedToken",
+                "name": "token",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getThreshold",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "num_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "denom_",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "grantRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "hasRole",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "highTierThreshold",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_roleSetter",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IWETH",
+                "name": "_wrappedToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_roninChainId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_numerator",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_highTierVWNumerator",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_denominator",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address[][3]",
+                "name": "_addresses",
+                "type": "address[][3]"
+            },
+            {
+                "internalType": "uint256[][4]",
+                "name": "_thresholds",
+                "type": "uint256[][4]"
+            },
+            {
+                "internalType": "enum TokenStandard[]",
+                "name": "_standards",
+                "type": "uint8[]"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "bridgeManagerContract",
+                "type": "address"
+            }
+        ],
+        "name": "initializeV2",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "initializeV3",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address payable",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "initializeV4",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "lastDateSynced",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "lastSyncedWithdrawal",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "lockedThreshold",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_mainchainTokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "_roninTokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "enum TokenStandard[]",
+                "name": "_standards",
+                "type": "uint8[]"
+            }
+        ],
+        "name": "mapTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_mainchainTokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "_roninTokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "enum TokenStandard[]",
+                "name": "_standards",
+                "type": "uint8[]"
+            },
+            {
+                "internalType": "uint256[][4]",
+                "name": "_thresholds",
+                "type": "uint256[][4]"
+            }
+        ],
+        "name": "mapTokensAndThresholds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "minimumVoteWeight",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "nonce",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "operators",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint96[]",
+                "name": "weights",
+                "type": "uint96[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "addeds",
+                "type": "bool[]"
+            }
+        ],
+        "name": "onBridgeOperatorsAdded",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "operators",
+                "type": "address[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "removeds",
+                "type": "bool[]"
+            }
+        ],
+        "name": "onBridgeOperatorsRemoved",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            }
+        ],
+        "name": "onERC1155BatchReceived",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            }
+        ],
+        "name": "onERC1155Received",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_token",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_quantity",
+                "type": "uint256"
+            }
+        ],
+        "name": "reachedWithdrawalLimit",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "receiveEther",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "renounceRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "recipientAddr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenAddr",
+                        "type": "address"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct Transfer.Request",
+                "name": "_request",
+                "type": "tuple"
+            }
+        ],
+        "name": "requestDepositFor",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "revokeRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "roninChainId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum ContractType",
+                "name": "contractType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            }
+        ],
+        "name": "setContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_tokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_limits",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "setDailyWithdrawalLimits",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_addr",
+                "type": "address"
+            }
+        ],
+        "name": "setEmergencyPauser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_tokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_thresholds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "setHighTierThresholds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_numerator",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_denominator",
+                "type": "uint256"
+            }
+        ],
+        "name": "setHighTierVoteWeightThreshold",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "_previousNum",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_previousDenom",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_tokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_thresholds",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "setLockedThresholds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "num",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "denom",
+                "type": "uint256"
+            }
+        ],
+        "name": "setThreshold",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_tokens",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_percentages",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "setUnlockFeePercentages",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IWETH",
+                "name": "_wrappedToken",
+                "type": "address"
+            }
+        ],
+        "name": "setWrappedNativeTokenContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct Transfer.Receipt",
+                "name": "_receipt",
+                "type": "tuple"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "v",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "r",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "s",
+                        "type": "bytes32"
+                    }
+                ],
+                "internalType": "struct SignatureConsumer.Signature[]",
+                "name": "_signatures",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "submitWithdrawal",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "_locked",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "interfaceId",
+                "type": "bytes4"
+            }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "unlockFeePercentages",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum Transfer.Kind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "mainchain",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "addr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddr",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "chainId",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenOwner",
+                        "name": "ronin",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum TokenStandard",
+                                "name": "erc",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TokenInfo",
+                        "name": "info",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct Transfer.Receipt",
+                "name": "receipt",
+                "type": "tuple"
+            }
+        ],
+        "name": "unlockWithdrawal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "unpause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdrawalHash",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdrawalLocked",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "wrappedNativeToken",
+        "outputs": [
+            {
+                "internalType": "contract IWETH",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
+    }
+]

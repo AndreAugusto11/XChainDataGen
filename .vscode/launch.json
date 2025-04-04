@@ -1,0 +1,159 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "[Stargate] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "stargate", "--start_ts", "1733616000", "--end_ts", "1735689600", "--blockchains", "ethereum", "polygon", "avalanche", "optimism", "arbitrum", "bnb", "base", "scroll", "linea"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/stargate" }
+      },
+      {
+        "name": "[Stargate] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "stargate"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/stargate" }
+      },
+      {
+        "name": "[Across] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "across", "--start_ts", "1734739200", "--end_ts", "1735689600", "--blockchains", "ethereum", "arbitrum", "polygon", "optimism", "base", "scroll", "linea"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/across" }
+      },
+      {
+        "name": "[Across] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "across"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/across" }
+      },
+      {
+        "name": "[Omnibridge] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "omnibridge", "--start_ts", "1733615945", "--end_ts", "1735689600", "--blockchains", "ethereum", "gnosis"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/omnibridge" }
+      },
+      {
+        "name": "[Omnibridge] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "omnibridge"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/omnibridge" }
+      },
+      {
+        "name": "[Ronin] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "ronin", "--start_ts", "1738195200", "--end_ts", "1738368000", "--blockchains", "ethereum", "ronin"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/ronin" }
+      },
+      {
+        "name": "[Ronin] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "ronin"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/ronin" }
+      },
+      {
+        "name": "[CCTP] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "cctp", "--start_ts", "1717196400", "--end_ts", "1735689600", "--blockchains", "ethereum", "arbitrum", "avalanche", "polygon", "optimism", "base"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/cctp" }
+      },
+      {
+        "name": "[CCTP] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "cctp"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/cctp" }
+      },
+      {
+        "name": "[CCIP] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "ccip", "--start_ts", "1729090880", "--end_ts", "1735689600", "--blockchains", "ethereum", "arbitrum", "avalanche", "polygon", "optimism", "base", "bnb", "gnosis", "ronin", "linea", "scroll"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/ccip" }
+      },
+      {
+        "name": "[CCIP] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "ccip"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/ccip" }
+      },
+      {
+        "name": "[Polygon] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "polygon", "--start_ts", "1717196400", "--end_ts", "1735689600", "--blockchains", "polygon"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/polygon" }
+      },
+      {
+        "name": "[Polygon] generate cross-chain transactions",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["generate", "--bridge", "polygon"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/polygon" }
+      },
+    ]
+  }

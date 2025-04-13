@@ -1,0 +1,160 @@
+blockchains:
+- name: ronin
+  contract: "0xc99a6a985ed2cac1ef41640596c5a5f9f4e19ef5"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x267083B"
+  end_block: "0x2670A2E"
+  rpcs:
+  - "https://ronin.lgns.net/rpc"
+  - "https://ronin.drpc.org"
+  - "https://api.roninchain.com/rpc"
+
+- name: arbitrum
+  contract: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x10AE6A39"
+  end_block: "0x10AE7209"
+  rpcs:
+  - "https://arbitrum.llamarpc.com"
+  - "https://endpoints.omniatech.io/v1/arbitrum/one/public"
+  - "https://arb1.arbitrum.io/rpc"
+  - "https://arbitrum-one.publicnode.com"
+  - "https://arbitrum.drpc.org"
+  - "https://rpc.ankr.com/arbitrum"
+  - "https://arbitrum.gateway.tenderly.co"
+  - "https://endpoints.omniatech.io/v1/arbitrum/one/public"
+  - "https://arb-pokt.nodies.app"
+  - "https://arbitrum.meowrpc.com"   
+
+- name: ethereum
+  contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x1447000"
+  end_block: "0x14478BC"
+  rpcs:
+  - "https://ethereum-rpc.publicnode.com"
+  - "https://mainnet.gateway.tenderly.co"
+  - "https://rpc.flashbots.net"
+  - "https://rpc.flashbots.net/fast"
+  - "https://rpc.mevblocker.io"
+  - "https://rpc.mevblocker.io/fast"
+  - "https://rpc.mevblocker.io/noreverts"
+  - "https://rpc.mevblocker.io/fullprivacy"
+
+- name: gnosis
+  contract: "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x23804B2"
+  end_block: "0x238C802"
+  rpcs:
+  - "https://rpc.gnosischain.com"
+  - "https://rpc.gnosis.gateway.fm"
+  - "https://rpc.ankr.com/gnosis"
+  - "https://gnosis.blockpi.network/v1/rpc/public"
+  - "https://gnosis.oat.farm"
+  - "https://gnosis-rpc.publicnode.com"
+
+- name: optimism
+  contract: "0x4200000000000000000000000000000000000006"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x7AB7B45"
+  end_block: "0x7AB8315"
+  rpcs:
+  - "https://optimism.llamarpc.com"
+  - "https://optimism.blockpi.network/v1/rpc/public"
+  - "https://optimism-rpc.publicnode.com"
+  - "https://optimism.gateway.tenderly.co"
+  - "https://optimism.drpc.org"
+
+- name: polygon
+  contract: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x30B2ADB"
+  end_block: "0x30B32AB"
+  rpcs:
+  - "https://polygon.llamarpc.com"
+
+  - "https://polygon-rpc.com/"
+  - "https://rpc-mainnet.matic.quiknode.pro"
+  - "https://polygon.gateway.tenderly.co"
+  - "https://polygon.drpc.org"
+  - "https://rpc.ankr.com/polygon"
+  - "https://polygon.api.onfinality.io/public"
+  - "https://polygon.rpc.subquery.network/public"
+  - "https://polygon.meowrpc.com"
+
+- name: base
+  contract: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x1610B43"
+  end_block: "0x1611313"
+  rpcs:
+  - "https://base.llamarpc.com"
+  - "https://rpc.numa.network/base"
+  - "https://mainnet.base.org"
+  - "https://base-mainnet.public.blastapi.io"
+  - "https://base-rpc.publicnode.com"
+
+- name: bnb
+  contract: "0xBA5Fe23f8a3a24BEd3236F05F2FcF35fd0BF0B5C"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x2AA96E0"
+  end_block: "0x2AA9EB0"
+  rpcs:
+  - "https://binance.llamarpc.com"
+  - "https://bscrpc.com"
+  - "https://endpoints.omniatech.io/v1/bsc/mainnet/public"
+  - "https://bsc.drpc.org"
+  - "https://rpc.ankr.com/bsc"
+  - "https://bsc.rpc.blxrbdn.com"
+
+- name: avalanche
+  contract: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0x33c1898"
+  end_block: "0x33c2068"
+  rpcs:
+  - "https://1rpc.io/avax/c"
+  - "https://avalanche.public-rpc.com"
+  - "https://avalanche-c-chain-rpc.publicnode.com"
+  - "https://rpc.ankr.com/avalanche"
+  - "https://avalanche.drpc.org"
+  - "https://avalanche-mainnet.gateway.tenderly.co"
+
+- name: scroll
+  contract: "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0xAE926E"
+  end_block: "0xAE9A3E"
+  rpcs:
+  - "https://scroll.drpc.org"
+  - "https://1rpc.io/scroll"
+  - "https://scroll-rpc.publicnode.com"
+  - "https://rpc.scroll.io"
+  - "https://scroll-mainnet.public.blastapi.io"
+  - "https://scroll-mainnet-public.unifra.io"
+  - "https://endpoints.omniatech.io/v1/scroll/mainnet/public"
+  - "https://scroll-mainnet.chainstacklabs.com"
+  - "https://rpc.ankr.com/scroll"
+
+- name: linea
+  contract: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff"
+  topics:
+  - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  start_block: "0xC8FA38"
+  end_block: "0xC90208"
+  rpcs:
+  - "https://linea.drpc.org"
+  - "https://linea-rpc.publicnode.com"
+  - "https://1rpc.io/linea"
+  - "https://rpc.linea.build"

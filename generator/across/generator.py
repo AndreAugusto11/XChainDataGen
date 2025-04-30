@@ -49,6 +49,7 @@ class AcrossGenerator(BaseGenerator):
 
             PriceGenerator.calculate_cctx_usd_values(self.bridge, self.across_cross_chain_token_transfers_repo, "across_cross_chain_transactions", "input_amount", "src_blockchain", "src_contract_address", "src_timestamp", "input_amount_usd")
             PriceGenerator.calculate_cctx_usd_values(self.bridge, self.across_cross_chain_token_transfers_repo, "across_cross_chain_transactions", "output_amount", "dst_blockchain", "dst_contract_address", "src_timestamp", "output_amount_usd")
+            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.across_relayer_refund_repo, "across_relayer_refund", "output_amount", "dst_blockchain", "dst_contract_address", "src_timestamp", "output_amount_usd")
             PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.across_cross_chain_token_transfers_repo, "across_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee", "src_fee_usd")
             PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.across_cross_chain_token_transfers_repo, "across_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee", "dst_fee_usd")
 

@@ -10,6 +10,7 @@ class Bridge(Enum):
     POLYGON = "polygon"
     RONIN = "ronin"
     OMNIBRIDGE = "omnibridge"
+    DEBRIDGE = "debridge"
 
 BLOCKCHAIN_IDS = {
     "8453": {

@@ -107,7 +107,7 @@ class BridgeDecoder:
     def convert_bytes_to_hex(self, data: Any) -> Any:
         if isinstance(data, dict):
             return {key: self.convert_bytes_to_hex(value) for key, value in data.items()}
-        elif isinstance(data, list):
+        elif isinstance(data, list) or isinstance(data, tuple):
             return [self.convert_bytes_to_hex(item) for item in data]
         elif isinstance(data, bytes):
             return convert_bin_to_hex(data)
@@ -129,14 +129,7 @@ class BridgeDecoder:
             decoded = contract.w3.codec.decode(types, params)
 
             # convert all fields from binary to hex
-            decoded = tuple(
-                (
-                    convert_bin_to_hex(param)
-                    if isinstance(param, (bytes, bytearray))
-                    else param
-                )
-                for param in decoded
-            )
+            decoded = self.convert_bytes_to_hex(decoded)
 
             normalized = map_abi_data(BASE_RETURN_NORMALIZERS, types, decoded)
 

@@ -5,7 +5,9 @@
 
 This repository contains the code for XChainDataGen, a cross-chain dataset extraction and generation framework -- i.e., a tool that **extracts** cross-chain data from bridge contracts in multiple blockchains and **generates** datasets of cross-chain transactions (CCTX).
 
-The paper can be accessed [here](https://arxiv.org/abs/2503.13637).
+📄 Paper: [https://arxiv.org/abs/2503.13637](https://arxiv.org/abs/2503.13637)
+
+📈 Dataset (Jun 2024 - Dec 2024): [https://zenodo.org/records/15341722](https://zenodo.org/records/15341722)
 
 
 ### Project structure

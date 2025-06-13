@@ -124,7 +124,7 @@ class OmnibridgeUserRequestForSignature(Base):
     blockchain            = Column(String(10),    nullable=False)
     transaction_hash      = Column(String(66),    nullable=False)
     message_id            = Column(String(66),    nullable=True)
-    encoded_data          = Column(String(66),    nullable=True)
+    encoded_data          = Column(String(1000),    nullable=True)
     encoded_data_hash     = Column(String(66),    nullable=True)
     recipient             = Column(String(42),    nullable=True)
     value                 = Column(Numeric(30,0), nullable=True)
@@ -173,7 +173,7 @@ class OmnibridgeUserRequestForAffirmation(Base):
     blockchain            = Column(String(10),    nullable=False)
     transaction_hash      = Column(String(66),    nullable=False)
     message_id            = Column(String(66),    nullable=True)
-    encoded_data          = Column(String(66),    nullable=True)
+    encoded_data          = Column(String(1000),    nullable=True)
     recipient             = Column(String(42),    nullable=True)
     value                 = Column(Numeric(30,0), nullable=True)
 

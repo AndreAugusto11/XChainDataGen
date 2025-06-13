@@ -222,8 +222,6 @@ class OmnibridgeGenerator(BaseGenerator):
             build_log_message_generator(self.bridge, "Matching Omnibridge token transfers...")
         )
 
-        self.xdai_cross_chain_transactions.empty_table()
-
         query_gnosis_to_ethereum = text(
         """
             INSERT INTO omnibridge_cross_chain_transactions (
@@ -267,8 +265,8 @@ class OmnibridgeGenerator(BaseGenerator):
                 deposit.message_id,
                 deposit2.sender,
                 fill.recipient,
-                deposit2.token, -- we hardcode the xDAI address in Ethereum
-                fill.token, -- we hardcode the xDAI address in Gnosis
+                deposit2.token,
+                fill.token,
                 fill.value,
                 NULL as amount_usd
             FROM omnibridge_user_request_for_signature deposit
@@ -323,8 +321,8 @@ class OmnibridgeGenerator(BaseGenerator):
                 deposit.message_id,
                 deposit2.sender,
                 fill.recipient,
-                deposit2.token, -- we hardcode the xDAI address in Ethereum
-                fill.token, -- we hardcode the xDAI address in Gnosis
+                deposit2.token,
+                fill.token,
                 fill.value,
                 NULL as amount_usd
             FROM omnibridge_user_request_for_affirmation deposit

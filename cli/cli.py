@@ -47,7 +47,7 @@ class Cli():
                         "Loading contracts and ABIs...",
                     )
                 )
-                extractor = Extractor(bridge, blockchain)
+                extractor = Extractor(bridge, blockchain, blockchains)
             except Exception as e:
                 log_to_cli(
                     build_log_message_2(

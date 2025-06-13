@@ -11,7 +11,7 @@ class DeBridgeBlockchainTransactionRepository(BaseRepository):
 
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
-            return session.query(DeBridgeBlockchainTransaction).get(transaction_hash)
+            return session.get(DeBridgeBlockchainTransaction, transaction_hash)
 
     def get_min_timestamp(self):
         with self.get_session() as session:

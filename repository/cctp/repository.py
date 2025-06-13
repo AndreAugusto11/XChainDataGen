@@ -35,7 +35,7 @@ class CCTPBlockchainTransactionRepository(BaseRepository):
 
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
-            return session.query(CCTPBlockchainTransaction).get(transaction_hash)
+            return session.get(CCTPBlockchainTransaction, transaction_hash)
     
     def get_min_timestamp(self):
         with self.get_session() as session:

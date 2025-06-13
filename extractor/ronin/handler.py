@@ -14,8 +14,8 @@ from utils.utils import CustomException, log_error
 class RoninHandler(BaseHandler):
     CLASS_NAME = "RoninHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.RONIN
 
     def get_bridge_contracts_and_topics(

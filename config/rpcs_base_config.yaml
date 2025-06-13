@@ -53,10 +53,12 @@ blockchains:
   rpcs:
   - "https://rpc.gnosischain.com"
   - "https://rpc.gnosis.gateway.fm"
-  - "https://rpc.ankr.com/gnosis"
-  - "https://gnosis.blockpi.network/v1/rpc/public"
   - "https://gnosis.oat.farm"
   - "https://gnosis-rpc.publicnode.com"
+  - "https://gnosis.drpc.org"
+  - "https://gnosis-mainnet.public.blastapi.io"
+  - "https://rpc.ap-southeast-1.gateway.fm/v4/gnosis/non-archival/mainnet"
+
 
 - name: optimism
   contract: "0x4200000000000000000000000000000000000006"
@@ -78,16 +80,14 @@ blockchains:
   start_block: "0x30B2ADB"
   end_block: "0x30B32AB"
   rpcs:
-  - "https://polygon.llamarpc.com"
-
-  - "https://polygon-rpc.com/"
   - "https://rpc-mainnet.matic.quiknode.pro"
   - "https://polygon.gateway.tenderly.co"
-  - "https://polygon.drpc.org"
-  - "https://rpc.ankr.com/polygon"
-  - "https://polygon.api.onfinality.io/public"
-  - "https://polygon.rpc.subquery.network/public"
-  - "https://polygon.meowrpc.com"
+  # - "https://polygon-rpc.com/" # This RPC is unreliable and often down / returns inconsistent results
+  # - "https://polygon.drpc.org" # This RPC is unreliable and often down / returns inconsistent results
+  # - "https://rpc.ankr.com/polygon" # This RPC is unreliable and often down / returns inconsistent results
+  # - "https://polygon.api.onfinality.io/public" # This RPC is unreliable and often down / returns inconsistent results
+  # - "https://polygon.rpc.subquery.network/public" # This RPC is unreliable and often down / returns inconsistent results
+  # - "https://polygon.meowrpc.com" # This RPC is unreliable and often down / returns inconsistent results
 
 - name: base
   contract: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2"
@@ -106,7 +106,7 @@ blockchains:
   contract: "0xBA5Fe23f8a3a24BEd3236F05F2FcF35fd0BF0B5C"
   topics:
   - "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
-  start_block: "0x2AA96E0"
+  start_block: "0x2AA9AC8"
   end_block: "0x2AA9EB0"
   rpcs:
   - "https://bsc.rpc.blxrbdn.com"
@@ -117,13 +117,11 @@ blockchains:
   - "https://bsc.meowrpc.com"
   - "https://api.zan.top/bsc-mainnet"
   - "https://bnb.api.onfinality.io/public"
-  - "https://rpc.owlracle.info/bsc/70d38ce1826c4a60bb2a8e05a6c8b20f"
   - "https://1rpc.io/bnb"
-  - "https://bsc-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f"
   - "https://binance.nodereal.io"
-  - "https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3"
   - "https://bsc-rpc.publicnode.com"
   - "https://bsc.drpc.org"
+  - "https://binance.llamarpc.com"
 
 - name: avalanche
   contract: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"

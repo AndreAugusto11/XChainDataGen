@@ -11,9 +11,41 @@ from utils.utils import (CliColor, CustomException, build_log_message,
 
 
 class Extractor:
+    """
+    Extractor is a class responsible for orchestrating the extraction of blockchain logs and transactions for a specified bridge and blockchain. It manages the division of block ranges, multi-threaded processing, dynamic handler loading, and the decoding and handling of logs and transactions.
+
+    Attributes:
+        CLASS_NAME (str): The name of the class.
+        task_queue (Queue): Queue to manage block range tasks for worker threads.
+        threads (list): List of active worker threads.
+        blockchain (str): The blockchain network to extract data from.
+        bridge (Bridge): The bridge instance specifying the protocol/bridge.
+        rpc_client (RPCClient): Client for interacting with blockchain RPC endpoints.
+        decoder (BridgeDecoder): Decoder for parsing logs specific to the bridge.
+        handler (BaseHandler): Handler for processing and storing extracted data.
+
+    Methods:
+        __init__(self, bridge: Bridge, blockchain: str):
+            Initializes the Extractor with the specified bridge and blockchain, sets up the RPC client, decoder, and handler.
+
+        load_handler(self) -> BaseHandler:
+            Dynamically loads and returns the handler for the specified bridge.
+
+        divide_block_ranges(start_block: int, end_block: int, chunk_size: int = 1000):
+            Divides a block range into smaller chunks for parallel processing.
+
+        work(self, contract: str, topics: list, start_block: int, end_block: int):
+            Processes logs and transactions for a given contract and block range, decodes logs, and invokes the bridge handler.
+
+        worker(self):
+            Worker function for threads to process block ranges from the task queue.
+
+        extract_data(self, start_block: int, end_block: int, blockchains: list):
+            Main extraction logic that validates contracts, divides block ranges, launches worker threads, and coordinates the extraction process.
+    """
     CLASS_NAME = "Extractor"
 
-    def __init__(self, bridge: Bridge, blockchain: str):
+    def __init__(self, bridge: Bridge, blockchain: str, blockchains: list):
         self.task_queue = Queue()
         self.threads = []
         self.blockchain = blockchain
@@ -25,10 +57,10 @@ class Extractor:
         self.decoder = BridgeDecoder(bridge, self.rpc_client.get_random_rpc(blockchain))
 
         # load the bridge handler and initiate a DB session
-        self.handler = self.load_handler()
+        self.handler = self.load_handler(blockchains)
 
 
-    def load_handler(self) -> BaseHandler:
+    def load_handler(self, blockchains: list) -> BaseHandler:
         """Dynamically loads the handler for the specified bridge."""
         func_name = "load_handler"
         bridge_name = self.bridge.value
@@ -38,14 +70,14 @@ class Extractor:
             handler_class_name = f"{bridge_name.capitalize()}Handler"
             handler_class = getattr(module, handler_class_name)
 
-            return handler_class(self.rpc_client)
+            return handler_class(self.rpc_client, blockchains)
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME, func_name, f"Bridge {bridge_name} not supported. {e}"
             )
 
     @staticmethod
-    def divide_block_ranges(start_block: int, end_block: int, chunk_size: int = 2000):
+    def divide_block_ranges(start_block: int, end_block: int, chunk_size: int = 1000):
         """Divide block range into smaller chunks."""
         ranges = []
         for block in range(start_block, end_block + 1, chunk_size):
@@ -139,7 +171,7 @@ class Extractor:
     def extract_data(self, start_block: int, end_block: int):
         """Main extraction logic."""
 
-        # validate t and blockchain mapping
+        # validate and blockchain mapping
         bridge_blockchain_pairs = self.handler.get_bridge_contracts_and_topics(
             self.bridge, self.blockchain
         )
@@ -153,7 +185,7 @@ class Extractor:
                     self.rpc_client.max_threads_per_blockchain(self.blockchain) * 2
                 )
 
-                chunk_size = min((end_block - start_block) // num_threads, 2000)
+                chunk_size = min((end_block - start_block) // num_threads, 1000)
 
                 if chunk_size < 1:
                     block_ranges = self.divide_block_ranges(start_block, end_block)

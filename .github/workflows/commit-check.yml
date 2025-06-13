@@ -1,0 +1,76 @@
+name: Commit Conventions, Signing, and Sign-off
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  check_commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full history for commit checks
+
+      - name: Check commit messages, GPG signatures, and sign-offs
+        run: |
+          pattern='^(feat|fix|docs|chore|test|refactor|style|perf|build)(\([a-zA-Z0-9_-]+\))?: .+'
+          bad_messages=0
+          unsigned_commits=0
+          missing_signoff=0
+
+          # Get commit range for PR or push
+          base_branch="origin/main"
+          if git show-ref --quiet refs/remotes/origin/main; then
+            commits=$(git rev-list $base_branch..HEAD)
+          else
+            # Fallback in case base is not available (e.g., first run)
+            commits=$(git rev-list HEAD)
+          fi
+
+          for commit in $commits; do
+            msg=$(git log -1 --pretty=format:"%s" "$commit")
+            sig=$(git log -1 --pretty=format:"%G?")
+            body=$(git log -1 --pretty=format:"%b" "$commit")
+
+            echo "🔍 Checking commit $commit: \"$msg\""
+
+            # Check message format
+            if ! echo "$msg" | grep -Eq "$pattern"; then
+              echo "❌ Invalid commit message: $msg"
+              bad_messages=1
+            fi
+
+            # Check GPG signature
+            if [ "$sig" != "G" ]; then
+              echo "❌ Commit $commit is not GPG signed"
+              unsigned_commits=1
+            fi
+
+            # Check for Signed-off-by
+            if ! echo "$body" | grep -q "Signed-off-by:"; then
+              echo "❌ Commit $commit is missing a Signed-off-by line"
+              missing_signoff=1
+            fi
+          done
+
+          if [ $bad_messages -ne 0 ]; then
+            echo "::error::Some commit messages don't follow the convention."
+            exit 1
+          fi
+
+          if [ $unsigned_commits -ne 0 ]; then
+            echo "::error::Some commits are not GPG signed."
+            exit 1
+          fi
+
+          if [ $missing_signoff -ne 0 ]; then
+            echo "::error::Some commits are missing a Signed-off-by line."
+            exit 1
+          fi
+
+          echo "✅ All commits pass the checks!"

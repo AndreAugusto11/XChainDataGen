@@ -15,8 +15,8 @@ from utils.utils import CustomException, log_error, log_to_file, unpad_address
 class StargateHandler(BaseHandler):
     CLASS_NAME = "StargateHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.STARGATE
 
     def get_bridge_contracts_and_topics(
@@ -949,7 +949,10 @@ class StargateHandler(BaseHandler):
         eid = str(eid)
 
         if eid in BLOCKCHAIN_IDS:
-            return BLOCKCHAIN_IDS[eid]["name"]
+            blockchain_name = BLOCKCHAIN_IDS[eid]["name"]
+
+            if self.counterPartyBlockchainsMap.get(blockchain_name):
+                return blockchain_name
         else:
             e = CustomException(
                 self.CLASS_NAME, func_name, f"Blockchain not found for EID: {eid}"

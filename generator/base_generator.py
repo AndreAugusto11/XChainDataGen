@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy.orm import scoped_session, sessionmaker
-
 from generator.common.price_generator import PriceGenerator
 from repository.database import engine
 

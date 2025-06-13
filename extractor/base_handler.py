@@ -2,18 +2,20 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
 from annotated_types import T
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from repository.database import engine
+from config.constants import BLOCKCHAIN_IDS
 from utils.rpc_utils import RPCClient
 from utils.utils import CustomException, convert_bin_to_hex
 
 
 class BaseHandler(ABC):
+    CLASS_NAME = "BaseHandler"
 
-    def __init__(self, rpc_client: RPCClient):
+    def __init__(self, rpc_client: RPCClient, blockchains: List[str]):
         self.rpc_client = rpc_client
         self.bind_db_to_repos()
+        
+        # Map of blockchains that are involved in the analysis, used to filter events.
+        self.counterPartyBlockchainsMap = {b: True for b in blockchains}
 
     @abstractmethod
     def handle_events(
@@ -85,3 +87,22 @@ class BaseHandler(ABC):
             else:
                 flattened[key] = value
         return flattened
+
+
+    def convert_id_to_blockchain_name(self, id: str) -> str | None:
+        func_name = "convert_id_to_blockchain_name"
+
+        id = str(id)
+
+        if id in BLOCKCHAIN_IDS:
+            blockchain_name = BLOCKCHAIN_IDS[id]["name"]
+            # If the blockchain name is not in the list of blockchains specified by the user, return None
+            if self.counterPartyBlockchainsMap.get(blockchain_name):
+                return BLOCKCHAIN_IDS[id]["name"]
+        
+        # If the blockchain ID is not found, log an error and return None
+        e = CustomException(
+            self.CLASS_NAME, func_name, f"Blockchain with ID {id} not included"
+        )
+        # log_to_file(e, "data/out_of_scope_blockchains.log")
+        return None

@@ -4,7 +4,7 @@ from config.constants import Bridge
 from extractor.base_handler import BaseHandler
 from extractor.ccip.constants import BRIDGE_CONFIG
 from repository.ccip.repository import *
-from repository.database import DBSession, engine
+from repository.database import DBSession
 from utils.rpc_utils import RPCClient
 from utils.utils import CustomException, log_error, unpad_address
 
@@ -12,8 +12,8 @@ from utils.utils import CustomException, log_error, unpad_address
 class CcipHandler(BaseHandler):
     CLASS_NAME = "CcipHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.CCIP
 
     def get_bridge_contracts_and_topics(

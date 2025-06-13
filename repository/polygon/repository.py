@@ -110,7 +110,7 @@ class PolygonBlockchainTransactionRepository(BaseRepository):
 
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
-            return session.query(PolygonBlockchainTransaction).get(transaction_hash)
+            return session.get(PolygonBlockchainTransaction, transaction_hash)
     
     def get_min_timestamp(self):
         with self.get_session() as session:

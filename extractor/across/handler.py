@@ -4,7 +4,7 @@ from config.constants import BLOCKCHAIN_IDS, Bridge
 from extractor.across.constants import BRIDGE_CONFIG
 from extractor.base_handler import BaseHandler
 from repository.across.repository import *
-from repository.database import DBSession, engine
+from repository.database import DBSession
 from utils.rpc_utils import RPCClient
 from utils.utils import CustomException, convert_bin_to_hex, log_error
 
@@ -12,8 +12,8 @@ from utils.utils import CustomException, convert_bin_to_hex, log_error
 class AcrossHandler(BaseHandler):
     CLASS_NAME = "AcrossHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.ACROSS
 
     def get_bridge_contracts_and_topics(
@@ -124,7 +124,6 @@ class AcrossHandler(BaseHandler):
             if self.across_v3_funds_deposited_repo.event_exists(event["depositId"]):
                 return None
 
-            print(f"Creating record for {event['transaction_hash']} in {func_name}")
             self.across_v3_funds_deposited_repo.create(
                 {
                     "blockchain": blockchain,
@@ -237,17 +236,3 @@ class AcrossHandler(BaseHandler):
                 )
 
         return event
-
-    def convert_id_to_blockchain_name(self, id: str) -> str:
-        func_name = "convert_id_to_blockchain_name"
-
-        id = str(id)
-
-        if id in BLOCKCHAIN_IDS:
-            return BLOCKCHAIN_IDS[id]["name"]
-        else:
-            e = CustomException(
-                self.CLASS_NAME, func_name, f"Blockchain not found for EID: {id}"
-            )
-            # log_to_file(e, "data/out_of_scope_blockchains.log")
-            return None

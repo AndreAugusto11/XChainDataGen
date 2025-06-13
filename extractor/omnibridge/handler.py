@@ -14,8 +14,8 @@ from utils.utils import CustomException, log_error
 class OmnibridgeHandler(BaseHandler):
     CLASS_NAME = "OmnibridgeHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.OMNIBRIDGE
 
     def get_bridge_contracts_and_topics(

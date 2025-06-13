@@ -15,8 +15,8 @@ from .constants import BLOCKCHAIN_IDS
 class CctpHandler(BaseHandler):
     CLASS_NAME = "CctpHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.CCTP
 
     def get_bridge_contracts_and_topics(
@@ -191,7 +191,10 @@ class CctpHandler(BaseHandler):
         id = str(id)
 
         if id in BLOCKCHAIN_IDS:
-            return BLOCKCHAIN_IDS[id]["name"]
+            blockchain_name = BLOCKCHAIN_IDS[id]["name"]
+
+            if self.counterPartyBlockchainsMap.get(blockchain_name):
+                return blockchain_name
         else:
             e = CustomException(
                 self.CLASS_NAME, func_name, f"Blockchain not found for Domain ID: {id}"

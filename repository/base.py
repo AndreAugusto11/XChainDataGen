@@ -28,6 +28,17 @@ class BaseRepository:
             else:
                 session.close()
 
+    def get_all(self):
+        """
+        Fetch all records from the model provided.
+        Returns a list of objects.
+        """
+        if self.model is None:
+            raise ValueError("Model is not defined for this repository.")
+
+        with self.get_session() as session:
+            return session.query(self.model).all()
+
     def create(self, obj_data: dict):
         """
         Create a new record using the model provided.

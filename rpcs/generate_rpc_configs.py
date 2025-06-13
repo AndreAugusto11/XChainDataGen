@@ -58,9 +58,15 @@ def test_rpcs(configs, blockchains):
                     ],
                 )
 
+                if "result" not in response:
+                    raise Exception(f"Invalid RPC response: {response}")
+                
+                if "error" in response:
+                    raise Exception(f"Error in RPC response: {response['error']}")
+
                 if len(response["result"]) == 0:
                     raise Exception("Something is going on here... no logs found...")
-
+                
                 rpcs.append(rpc)
 
             except Exception as e:

@@ -14,8 +14,8 @@ from utils.utils import CustomException, log_error, unpad_address
 class DebridgeHandler(BaseHandler):
     CLASS_NAME = "DebridgeHandler"
 
-    def __init__(self, rpc_client: RPCClient) -> None:
-        super().__init__(rpc_client)
+    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+        super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.DEBRIDGE
 
     def get_bridge_contracts_and_topics(
@@ -254,8 +254,6 @@ class DebridgeHandler(BaseHandler):
             )
 
     def convert_id_to_blockchain_name(self, id: str) -> str:
-        func_name = "convert_id_to_blockchain_name"
-
         id = str(id)
 
         # Discard smaller blockchains as we focus on the ones with more transferred value
@@ -263,11 +261,4 @@ class DebridgeHandler(BaseHandler):
         if id.startswith("1000000"):
             return None
 
-        if id in BLOCKCHAIN_IDS:
-            return BLOCKCHAIN_IDS[id]["name"]
-        else:
-            e = CustomException(
-                self.CLASS_NAME, func_name, f"Blockchain not found for ID: {id}"
-            )
-            # log_to_file(e, "data/out_of_scope_blockchains.log")
-            return None
+        return super().convert_id_to_blockchain_name(id)

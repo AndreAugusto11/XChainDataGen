@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 
 from generator.common.price_generator import PriceGenerator
-from repository.database import engine
 
 
 class BaseGenerator(ABC):
-
     def __init__(self) -> None:
         self.bind_db_to_repos()
         self.price_generator = PriceGenerator()

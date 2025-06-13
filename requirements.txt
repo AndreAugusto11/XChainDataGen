@@ -76,6 +76,7 @@ pyzmq==26.2.0
 referencing==0.35.1
 regex==2024.11.6
 requests==2.32.4
+ruff==0.4.4
 rlp==4.0.1
 rpds-py==0.22.3
 seaborn==0.13.2

@@ -3,17 +3,29 @@ import time
 from sqlalchemy import text
 
 from config.constants import Bridge
-from extractor.stargate.constants import (STARGATE_OFT_TOKEN_MAPPING,
-                                          STARGATE_POOL_TOKEN_MAPPING)
+from extractor.stargate.constants import STARGATE_OFT_TOKEN_MAPPING, STARGATE_POOL_TOKEN_MAPPING
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.common.repository import (NativeTokenRepository,
-                                          TokenMetadataRepository,
-                                          TokenPriceRepository)
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from repository.stargate.repository import *
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from repository.stargate.repository import (
+    StargateBlockchainTransactionRepository,
+    StargateBusCrossChainTransactionRepository,
+    StargateCrossChainSwapRepository,
+    StargateCrossChainTokenTransferRepository,
+    StargateOFTCrossChainTransactionRepository,
+)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class StargateGenerator(BaseGenerator):
@@ -26,7 +38,9 @@ class StargateGenerator(BaseGenerator):
 
     def bind_db_to_repos(self):
         self.transactions_repo = StargateBlockchainTransactionRepository(DBSession)
-        self.bus_cross_chain_transactions_repo = StargateBusCrossChainTransactionRepository(DBSession)
+        self.bus_cross_chain_transactions_repo = StargateBusCrossChainTransactionRepository(
+            DBSession
+        )
         self.cross_chain_token_transfers_repo = StargateCrossChainTokenTransferRepository(DBSession)
         self.oft_cross_chain_transactions = StargateOFTCrossChainTransactionRepository(DBSession)
         self.cross_chain_swap_repo = StargateCrossChainSwapRepository(DBSession)
@@ -49,7 +63,14 @@ class StargateGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             ## POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
             ## POPULATE TOKEN TABLES WITH CROSS CHAIN TRANSACTIONS INFO
             cctxs = self.bus_cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
@@ -64,36 +85,250 @@ class StargateGenerator(BaseGenerator):
             cctxs = self.cross_chain_swap_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_liquidity_pools(cctxs, start_ts, end_ts)
 
-            ## CALCULATE USD VALUES (AND POPULATE CORRESPONDING COLUMNS) FOR CROSS CHAIN TRANSACTIONS (VALUE TRANSACTED AND FEES)
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "amount_received_ld", "src_blockchain", "src_contract_address", "user_timestamp", "amount_received_ld_usd")
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "amount_sent_ld", "src_blockchain", "src_contract_address", "user_timestamp", "amount_sent_ld_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "user_timestamp", "src_blockchain", "user_fee",  "user_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "user_timestamp", "src_blockchain", "bus_fee",      "bus_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "user_timestamp", "src_blockchain", "bus_fare",     "bus_fare_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "user_timestamp", "src_blockchain", "executor_fee", "executor_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "user_timestamp", "src_blockchain", "dvn_fee",      "dvn_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.bus_cross_chain_transactions_repo, "stargate_bus_cross_chain_transactions", "dst_timestamp",  "dst_blockchain", "dst_fee",   "dst_fee_usd")
+            ## CALCULATE USD VALUES (AND POPULATE CORRESPONDING COLUMNS)
+            # FOR CROSS CHAIN TRANSACTIONS (VALUE TRANSACTED AND FEES)
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "amount_received_ld",
+                "src_blockchain",
+                "src_contract_address",
+                "user_timestamp",
+                "amount_received_ld_usd",
+            )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "amount_sent_ld",
+                "src_blockchain",
+                "src_contract_address",
+                "user_timestamp",
+                "amount_sent_ld_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "user_timestamp",
+                "src_blockchain",
+                "user_fee",
+                "user_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "user_timestamp",
+                "src_blockchain",
+                "bus_fee",
+                "bus_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "user_timestamp",
+                "src_blockchain",
+                "bus_fare",
+                "bus_fare_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "user_timestamp",
+                "src_blockchain",
+                "executor_fee",
+                "executor_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "user_timestamp",
+                "src_blockchain",
+                "dvn_fee",
+                "dvn_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.bus_cross_chain_transactions_repo,
+                "stargate_bus_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_oft_cross_chain_transactions", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_oft_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee",  "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_oft_cross_chain_transactions", "src_timestamp", "src_blockchain", "executor_fee",  "executor_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_oft_cross_chain_transactions", "src_timestamp", "src_blockchain", "dvn_fee",  "dvn_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_oft_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee",  "dst_fee_usd")
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_oft_cross_chain_transactions",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_oft_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_oft_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "executor_fee",
+                "executor_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_oft_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "dvn_fee",
+                "dvn_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_oft_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_token_transfers_repo, "stargate_cross_chain_token_transfers", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_cross_chain_token_transfers", "src_timestamp", "src_blockchain", "src_fee",  "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_cross_chain_token_transfers", "src_timestamp", "src_blockchain", "verifier_fee",  "verifier_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_cross_chain_token_transfers", "src_timestamp", "src_blockchain", "relayer_fee",  "relayer_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.oft_cross_chain_transactions, "stargate_cross_chain_token_transfers", "dst_timestamp", "dst_blockchain", "dst_fee",  "dst_fee_usd")
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_token_transfers_repo,
+                "stargate_cross_chain_token_transfers",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_cross_chain_token_transfers",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_cross_chain_token_transfers",
+                "src_timestamp",
+                "src_blockchain",
+                "verifier_fee",
+                "verifier_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_cross_chain_token_transfers",
+                "src_timestamp",
+                "src_blockchain",
+                "relayer_fee",
+                "relayer_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.oft_cross_chain_transactions,
+                "stargate_cross_chain_token_transfers",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "amount_sd", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "src_fee",   "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "dst_timestamp", "dst_blockchain", "dst_fee",   "dst_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "verifier_fee", "verifier_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "relayer_fee",  "relayer_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "protocol_fee", "protocol_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "eq_fee",       "eq_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_swap_repo, "stargate_cross_chain_swaps", "src_timestamp", "src_blockchain", "lp_fee",       "lp_fee_usd")
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "amount_sd",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "verifier_fee",
+                "verifier_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "relayer_fee",
+                "relayer_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "protocol_fee",
+                "protocol_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "eq_fee",
+                "eq_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_swap_repo,
+                "stargate_cross_chain_swaps",
+                "src_timestamp",
+                "src_blockchain",
+                "lp_fee",
+                "lp_fee_usd",
+            )
 
         except Exception as e:
             exception = CustomException(
@@ -103,14 +338,11 @@ class StargateGenerator(BaseGenerator):
             )
             log_error(self.bridge, exception)
 
-
     def match_token_transfers(self):
         func_name = "match_token_transfers"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching token transfers...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching token transfers..."))
 
         self.cross_chain_token_transfers_repo.empty_table()
 
@@ -178,7 +410,7 @@ class StargateGenerator(BaseGenerator):
             WHERE oft_receive_from_chain.amount = oft_send_to_chain.amount
             AND oft_send_to_chain.dst_blockchain = oft_receive_from_chain.blockchain
             AND oft_send_to_chain.blockchain = src_tx.blockchain;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -190,7 +422,10 @@ class StargateGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -199,15 +434,13 @@ class StargateGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
+            ) from e
 
     def match_swap_events(self):
         func_name = "match_swap_events"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching cross-chain swaps...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching cross-chain swaps..."))
 
         self.cross_chain_swap_repo.empty_table()
 
@@ -291,7 +524,7 @@ class StargateGenerator(BaseGenerator):
             WHERE swap_remote.amount_sd = swap.amount_sd
             AND swap.protocol_fee = swap_remote.protocol_fee
             AND swap.eq_fee = swap_remote.dst_fee;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -303,7 +536,10 @@ class StargateGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Cross-chain swaps matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Cross-chain swaps matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -312,15 +548,13 @@ class StargateGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing swap events. Error: {e}",
-            )
+            ) from e
 
     def match_oft_transfers(self):
         func_name = "match_oft_transfers"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching OFT token transfers...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching OFT token transfers..."))
 
         self.oft_cross_chain_transactions.empty_table()
 
@@ -385,7 +619,7 @@ class StargateGenerator(BaseGenerator):
             JOIN stargate_blockchain_transactions dst_tx ON dst_tx.transaction_hash = oft_received.transaction_hash
             WHERE oft_sent.dst_blockchain = oft_received.blockchain
             AND oft_sent.blockchain = oft_received.src_blockchain;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -397,7 +631,10 @@ class StargateGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"OFT token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"OFT token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -406,16 +643,14 @@ class StargateGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing oft transfers. Error: {e}",
-            )
+            ) from e
 
     def match_bus_transactions(self):
         func_name = "match_bus_transactions"
 
         start_time = time.time()
         log_to_cli(
-            build_log_message_generator(
-                self.bridge, "Matching bus cross-chain transfers..."
-            )
+            build_log_message_generator(self.bridge, "Matching bus cross-chain transfers...")
         )
 
         self.bus_cross_chain_transactions_repo.empty_table()
@@ -523,7 +758,7 @@ class StargateGenerator(BaseGenerator):
             WHERE bus_rode.blockchain = oft_sent.blockchain
             AND bus_rode.blockchain = bus_driven.blockchain
             AND oft_sent.blockchain = bus_driven.blockchain;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -535,7 +770,10 @@ class StargateGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Bus cross-chain transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Bus cross-chain transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -544,14 +782,17 @@ class StargateGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing bus transactions. Error: {e}",
-            )
-        
+            ) from e
 
     def populate_token_info_liquidity_pools(self, cctxs, start_ts, end_ts):
         for cctx in cctxs:
             try:
-                input_token = STARGATE_POOL_TOKEN_MAPPING[cctx.src_blockchain][cctx.src_contract_address]
-                output_token = STARGATE_POOL_TOKEN_MAPPING[cctx.dst_blockchain][cctx.dst_contract_address]
+                input_token = STARGATE_POOL_TOKEN_MAPPING[cctx.src_blockchain][
+                    cctx.src_contract_address
+                ]
+                output_token = STARGATE_POOL_TOKEN_MAPPING[cctx.dst_blockchain][
+                    cctx.dst_contract_address
+                ]
 
                 self.price_generator.populate_token_info(
                     self.bridge,
@@ -572,16 +813,22 @@ class StargateGenerator(BaseGenerator):
                     CustomException(
                         self.CLASS_NAME,
                         "populate_token_info_liquidity_pools",
-                        f"Error populating token info for bus cross chain transactions. CCTX: {cctx} Error: {e}",
+                        (
+                            f"Error populating token info for bus cross chain transactions."
+                            f"CCTX: {cctx} Error: {e}",
+                        ),
                     ),
                 )
-
 
     def populate_token_info_cctxs(self, cctxs, start_ts, end_ts):
         for cctx in cctxs:
             try:
-                input_token = STARGATE_OFT_TOKEN_MAPPING[cctx.src_blockchain][cctx.src_contract_address]
-                output_token = STARGATE_OFT_TOKEN_MAPPING[cctx.dst_blockchain][cctx.dst_contract_address]
+                input_token = STARGATE_OFT_TOKEN_MAPPING[cctx.src_blockchain][
+                    cctx.src_contract_address
+                ]
+                output_token = STARGATE_OFT_TOKEN_MAPPING[cctx.dst_blockchain][
+                    cctx.dst_contract_address
+                ]
 
                 self.price_generator.populate_token_info(
                     self.bridge,
@@ -593,8 +840,12 @@ class StargateGenerator(BaseGenerator):
                     output_token,
                     start_ts,
                     end_ts,
-                    cctx.src_contract_address if input_token != cctx.src_contract_address else input_token,
-                    cctx.dst_contract_address if output_token != cctx.dst_contract_address else output_token,
+                    cctx.src_contract_address
+                    if input_token != cctx.src_contract_address
+                    else input_token,
+                    cctx.dst_contract_address
+                    if output_token != cctx.dst_contract_address
+                    else output_token,
                 )
             except Exception as e:
                 log_error(
@@ -602,6 +853,9 @@ class StargateGenerator(BaseGenerator):
                     CustomException(
                         self.CLASS_NAME,
                         "populate_token_info_cctxs",
-                        f"Error populating token info for cross chain token transfers. CCTX: {cctx} Error: {e}",
+                        (
+                            f"Error populating token info for cross chain token transfers. "
+                            f"CCTX: {cctx} Error: {e}",
+                        ),
                     ),
                 )

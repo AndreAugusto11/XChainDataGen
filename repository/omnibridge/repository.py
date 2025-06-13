@@ -1,8 +1,20 @@
-from sqlalchemy import Index, func
+from sqlalchemy import func
 
 from repository.base import BaseRepository
 
-from .models import *
+from .models import (
+    OmnibridgeAffirmationCompleted,
+    OmnibridgeBlockchainTransaction,
+    OmnibridgeCrossChainTransactions,
+    OmnibridgeOperatorTransactions,
+    OmnibridgeRelayedMessage,
+    OmnibridgeSignedForAffirmation,
+    OmnibridgeSignedForUserRequest,
+    OmnibridgeTokensBridged,
+    OmnibridgeTokensBridgingInitiated,
+    OmnibridgeUserRequestForAffirmation,
+    OmnibridgeUserRequestForSignature,
+)
 
 
 class OmnibridgeBlockchainTransactionRepository(BaseRepository):
@@ -20,7 +32,7 @@ class OmnibridgeBlockchainTransactionRepository(BaseRepository):
     def get_max_timestamp(self):
         with self.get_session() as session:
             return session.query(func.max(OmnibridgeBlockchainTransaction.timestamp)).scalar()
-    
+
 
 class OmnibridgeTokensBridgedRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -64,6 +76,7 @@ class OmnibridgeUserRequestForAffirmationRepository(BaseRepository):
 
 ########## Processed Data ##########
 
+
 class OmnibridgeCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(OmnibridgeCrossChainTransactions, session_factory)
@@ -87,28 +100,34 @@ class OmnibridgeCrossChainTransactionsRepository(BaseRepository):
 
     def get_by_src_tx_hash(self, src_tx_hash: str):
         with self.get_session() as session:
-            return session.query(OmnibridgeCrossChainTransactions).filter(
-                OmnibridgeCrossChainTransactions.src_transaction_hash == src_tx_hash
-            ).first()
+            return (
+                session.query(OmnibridgeCrossChainTransactions)
+                .filter(OmnibridgeCrossChainTransactions.src_transaction_hash == src_tx_hash)
+                .first()
+            )
 
     def get_unique_src_dst_contract_pairs(self):
         with self.get_session() as session:
-            return session.query(
-                OmnibridgeCrossChainTransactions.src_blockchain,
-                OmnibridgeCrossChainTransactions.src_contract_address,
-                OmnibridgeCrossChainTransactions.dst_blockchain,
-                OmnibridgeCrossChainTransactions.dst_contract_address,
-            ).group_by(
-                OmnibridgeCrossChainTransactions.src_blockchain,
-                OmnibridgeCrossChainTransactions.src_contract_address,
-                OmnibridgeCrossChainTransactions.dst_blockchain,
-                OmnibridgeCrossChainTransactions.dst_contract_address
-            ).all()
-    
+            return (
+                session.query(
+                    OmnibridgeCrossChainTransactions.src_blockchain,
+                    OmnibridgeCrossChainTransactions.src_contract_address,
+                    OmnibridgeCrossChainTransactions.dst_blockchain,
+                    OmnibridgeCrossChainTransactions.dst_contract_address,
+                )
+                .group_by(
+                    OmnibridgeCrossChainTransactions.src_blockchain,
+                    OmnibridgeCrossChainTransactions.src_contract_address,
+                    OmnibridgeCrossChainTransactions.dst_blockchain,
+                    OmnibridgeCrossChainTransactions.dst_contract_address,
+                )
+                .all()
+            )
+
     def get_total_amount_usd_transacted(self):
         with self.get_session() as session:
             return session.query(func.sum(OmnibridgeCrossChainTransactions.amount_usd)).scalar()
-    
+
 
 class OmnibridgeOperatorTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):

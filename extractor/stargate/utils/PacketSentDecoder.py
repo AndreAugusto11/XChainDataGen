@@ -14,7 +14,6 @@ MESSAGE_OFFSET = 113
 
 
 class PacketSentDecoder:
-
     @staticmethod
     def decode(payload: Union[bytes, str]):
         if isinstance(payload, str):

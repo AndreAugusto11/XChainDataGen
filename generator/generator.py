@@ -9,7 +9,6 @@ class Generator:
         self.bridge = bridge
         self.generator = self.load_generator()
 
-
     def load_generator(self):
         """Dynamically loads the generator for the specified bridge."""
         func_name = "load_generator"
@@ -24,8 +23,7 @@ class Generator:
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME, func_name, f"Bridge {bridge_name} not supported"
-            )
-
+            ) from e
 
     def generate_data(self):
         """Main generation logic."""

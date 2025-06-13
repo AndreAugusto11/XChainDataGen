@@ -12,7 +12,6 @@ PAYLOAD_OFFSET = 52
 
 
 class PacketDecoder:
-
     @staticmethod
     def decode(payload: Union[bytes, str]):
         if isinstance(payload, str):

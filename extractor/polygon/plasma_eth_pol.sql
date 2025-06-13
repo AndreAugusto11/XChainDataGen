@@ -22,7 +22,7 @@ SELECT
 FROM polygon_new_deposit_block deposit
 LEFT JOIN polygon_state_synced deposit_state ON deposit_state.transaction_hash = deposit.transaction_hash
 LEFT JOIN polygon_blockchain_transactions src_tx ON deposit.transaction_hash = src_tx.transaction_hash
-LEFT JOIN polygon_state_comitted fill_state ON fill_state.state_id = deposit_state.state_id
+LEFT JOIN polygon_state_committed fill_state ON fill_state.state_id = deposit_state.state_id
 LEFT JOIN polygon_token_deposited fill ON fill.transaction_hash = fill_state.transaction_hash
 LEFT JOIN polygon_blockchain_transactions dst_tx ON dst_tx.transaction_hash = fill_state.transaction_hash
 WHERE deposit_state.data LIKE '%' || SUBSTRING(deposit.token FROM 3) || '%'

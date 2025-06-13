@@ -6,11 +6,11 @@ from repository.database import Base
 class TokenPrice(Base):
     __tablename__ = "token_price"
 
-    id                    = Column(Integer,    nullable=False, autoincrement=True, primary_key=True)
-    symbol                = Column(String(50), nullable=False)
-    name                  = Column(String(50), nullable=False)
-    date                  = Column(Date,       nullable=True)
-    price_usd             = Column(Float,    nullable=False)
+    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
+    symbol = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False)
+    date = Column(Date, nullable=True)
+    price_usd = Column(Float, nullable=False)
 
     def __init__(self, symbol, name, date, price_usd):
         self.symbol = symbol
@@ -25,12 +25,12 @@ class TokenPrice(Base):
 class TokenMetadata(Base):
     __tablename__ = "token_metadata"
 
-    id                    = Column(Integer,    nullable=False, autoincrement=True, primary_key=True)
-    symbol                = Column(String(50), nullable=False)
-    name                  = Column(String(50), nullable=False)
-    decimals              = Column(Integer,    nullable=False)
-    blockchain            = Column(String(10), nullable=False)
-    address               = Column(String(42), nullable=True)
+    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
+    symbol = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False)
+    decimals = Column(Integer, nullable=False)
+    blockchain = Column(String(10), nullable=False)
+    address = Column(String(42), nullable=True)
 
     def __init__(self, symbol, name, decimals, blockchain, address):
         self.symbol = symbol
@@ -40,14 +40,20 @@ class TokenMetadata(Base):
         self.address = address
 
     def __repr__(self):
-        return f"<Token(symbol={self.symbol}, name={self.name}, decimals={self.decimals}, blockchain={self.blockchain}, address={self.address})>"
+        return (
+            f"<Token(symbol={self.symbol}, "
+            f"name={self.name}, "
+            f"decimals={self.decimals}, "
+            f"blockchain={self.blockchain}, "
+            f"address={self.address})>"
+        )
 
 
 class NativeToken(Base):
     __tablename__ = "native_token"
 
-    blockchain            = Column(String(10), nullable=False, primary_key=True)
-    symbol                = Column(String(50), nullable=False)
+    blockchain = Column(String(10), nullable=False, primary_key=True)
+    symbol = Column(String(50), nullable=False)
 
     def __init__(self, symbol, blockchain):
         self.symbol = symbol
@@ -55,4 +61,3 @@ class NativeToken(Base):
 
     def __repr__(self):
         return f"<Token(symbol={self.symbol}, blockchain={self.blockchain})>"
-

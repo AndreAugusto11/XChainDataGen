@@ -1,9 +1,14 @@
 from typing import Any, Dict, List
 
-from config.constants import BLOCKCHAIN_IDS, Bridge
+from config.constants import Bridge
 from extractor.across.constants import BRIDGE_CONFIG
 from extractor.base_handler import BaseHandler
-from repository.across.repository import *
+from repository.across.repository import (
+    AcrossBlockchainTransactionRepository,
+    AcrossFilledV3RelayRepository,
+    AcrossRelayerRefundRepository,
+    AcrossV3FundsDepositedRepository,
+)
 from repository.database import DBSession
 from utils.rpc_utils import RPCClient
 from utils.utils import CustomException, convert_bin_to_hex, log_error
@@ -16,9 +21,7 @@ class AcrossHandler(BaseHandler):
         super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.ACROSS
 
-    def get_bridge_contracts_and_topics(
-        self, bridge: str, blockchain: List[str]
-    ) -> None:
+    def get_bridge_contracts_and_topics(self, bridge: str, blockchain: List[str]) -> None:
         """
         Validates the mapping between the bridge and the blockchains.
 
@@ -28,22 +31,12 @@ class AcrossHandler(BaseHandler):
         """
 
         if blockchain not in BRIDGE_CONFIG["blockchains"]:
-            raise ValueError(
-                f"Blockchain {blockchain} not supported for bridge {bridge}."
-            )
+            raise ValueError(f"Blockchain {blockchain} not supported for bridge {bridge}.")
 
         return BRIDGE_CONFIG["blockchains"][blockchain]
 
     def bind_db_to_repos(self):
-        """
-        This function is needed to rebind the repositories to new sessions when we have to rollback failed transactions
-        (e.g., because of unique constraints in the tables) and create a new session.
-        Binds the database session to the repository instances used in the handler.
-        """
-
-        self.blockchain_transaction_repo = AcrossBlockchainTransactionRepository(
-            DBSession
-        )
+        self.blockchain_transaction_repo = AcrossBlockchainTransactionRepository(DBSession)
         self.across_filled_v3_relay_repo = AcrossFilledV3RelayRepository(DBSession)
         self.across_v3_funds_deposited_repo = AcrossV3FundsDepositedRepository(DBSession)
         self.across_relayer_refund_repo = AcrossRelayerRefundRepository(DBSession)
@@ -57,7 +50,7 @@ class AcrossHandler(BaseHandler):
                 self.CLASS_NAME,
                 func_name,
                 f"Error writing transactions to database: {e}",
-            )
+            ) from e
 
     def does_transaction_exist_by_hash(self, transaction_hash: str) -> Any:
         func_name = "does_transaction_exist_by_hash"
@@ -71,15 +64,13 @@ class AcrossHandler(BaseHandler):
             The transaction with the given hash.
         """
         try:
-            return self.blockchain_transaction_repo.get_transaction_by_hash(
-                transaction_hash
-            )
+            return self.blockchain_transaction_repo.get_transaction_by_hash(transaction_hash)
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME,
                 func_name,
                 f"Error reading transaction from database: {e}",
-            )
+            ) from e
 
     def handle_events(
         self,
@@ -91,21 +82,33 @@ class AcrossHandler(BaseHandler):
         events: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
         included_events = []
-            
+
         for event in events:
             try:
-                if event["topic"]   == "0xa123dc29aebf7d0c3322c8eeb5b999e859f39937950ed31056532713d0de396f": # V3FundsDeposited
+                if (
+                    event["topic"]
+                    == "0xa123dc29aebf7d0c3322c8eeb5b999e859f39937950ed31056532713d0de396f"
+                ):  # V3FundsDeposited
                     event = self.handle_v3_funds_deposited(blockchain, event)
-                elif event["topic"] == "0x571749edf1d5c9599318cdbc4e28a6475d65e87fd3b2ddbe1e9a8d5e7a0f0ff7": # FilledV3Relay
+                elif (
+                    event["topic"]
+                    == "0x571749edf1d5c9599318cdbc4e28a6475d65e87fd3b2ddbe1e9a8d5e7a0f0ff7"
+                ):  # FilledV3Relay
                     event = self.handle_filled_v3_relay(blockchain, event)
-                elif event["topic"] == "0xf8bd640004bcec1b89657020f561d0b070cbdf662d0b158db9dccb0a8301bfab": # ExecutedRelayerRefundRoot
+                elif (
+                    event["topic"]
+                    == "0xf8bd640004bcec1b89657020f561d0b070cbdf662d0b158db9dccb0a8301bfab"
+                ):  # ExecutedRelayerRefundRoot
                     event = self.handle_relayer_refund(blockchain, event)
 
                 if event:
                     included_events.append(event)
 
             except CustomException as e:
-                request_desc = f"Error processing request: {blockchain}, {start_block}, {end_block}, {contract}, {topics}.\n{e}"
+                request_desc = (
+                    f"Error processing request: {blockchain}, {start_block}, "
+                    f"{end_block}, {contract}, {topics}.\n{e}"
+                )
                 log_error(self.bridge, request_desc)
 
         return included_events
@@ -113,9 +116,7 @@ class AcrossHandler(BaseHandler):
     def handle_v3_funds_deposited(self, blockchain, event):
         func_name = "v3_funds_deposited"
 
-        destination_chain = self.convert_id_to_blockchain_name(
-            event["destinationChainId"]
-        )
+        destination_chain = self.convert_id_to_blockchain_name(event["destinationChainId"])
 
         if destination_chain is None:
             return None
@@ -149,17 +150,13 @@ class AcrossHandler(BaseHandler):
                 self.CLASS_NAME,
                 func_name,
                 f"{blockchain} -- Tx Hash: {event['transaction_hash']}. Error writing to DB: {e}",
-            )
-        
+            ) from e
+
     def handle_filled_v3_relay(self, blockchain, event):
         func_name = "filled_v3_relay"
 
-        origin_chain = self.convert_id_to_blockchain_name(
-            event["originChainId"]
-        )
-        repayment_chain = self.convert_id_to_blockchain_name(
-            event["repaymentChainId"]
-        )
+        origin_chain = self.convert_id_to_blockchain_name(event["originChainId"])
+        repayment_chain = self.convert_id_to_blockchain_name(event["repaymentChainId"])
 
         if repayment_chain is None or origin_chain is None:
             return None
@@ -187,25 +184,28 @@ class AcrossHandler(BaseHandler):
                     "recipient": event["recipient"],
                     "message": event["message"],
                     "updated_recipient": event["relayExecutionInfo"]["updatedRecipient"],
-                    "updated_message": convert_bin_to_hex(event["relayExecutionInfo"]["updatedMessage"]),
-                    "updated_output_amount": str(event["relayExecutionInfo"]["updatedOutputAmount"]),
+                    "updated_message": convert_bin_to_hex(
+                        event["relayExecutionInfo"]["updatedMessage"]
+                    ),
+                    "updated_output_amount": str(
+                        event["relayExecutionInfo"]["updatedOutputAmount"]
+                    ),
                     "fill_type": event["relayExecutionInfo"]["fillType"],
                 }
             )
-            
+
             return event
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME,
                 func_name,
                 f"{blockchain} -- Tx Hash: {event['transaction_hash']}. Error writing to DB: {e}",
-            )
-        
+            ) from e
+
     def handle_relayer_refund(self, blockchain, event):
         func_name = "relayer_refund"
 
         for i in range(len(event["refundAmounts"])):
-
             try:
                 if self.across_relayer_refund_repo.event_exists(
                     event["transaction_hash"],
@@ -232,7 +232,7 @@ class AcrossHandler(BaseHandler):
                 raise CustomException(
                     self.CLASS_NAME,
                     func_name,
-                    f"{blockchain} -- Tx Hash: {event['transaction_hash']}. Error writing to DB: {e}",
-                )
+                    f"{blockchain} - Tx Hash: {event['transaction_hash']}. Error writing to DB:{e}",
+                ) from e
 
         return event

@@ -5,11 +5,25 @@ from sqlalchemy import text
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.cctp.repository import *
-from repository.common.repository import *
+from repository.cctp.repository import (
+    CCTPBlockchainTransactionRepository,
+    CctpCrossChainTransactionsRepository,
+    CCTPDepositForBurnRepository,
+    CCTPMessageReceivedRepository,
+)
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class CctpGenerator(BaseGenerator):
@@ -41,15 +55,46 @@ class CctpGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             # POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
             cctxs = self.cctp_cross_chain_token_transfers_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cctp_cross_chain_token_transfers_repo, "cctp_cross_chain_transactions", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cctp_cross_chain_token_transfers_repo, "cctp_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee", "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cctp_cross_chain_token_transfers_repo, "cctp_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee", "dst_fee_usd")
-
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cctp_cross_chain_token_transfers_repo,
+                "cctp_cross_chain_transactions",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cctp_cross_chain_token_transfers_repo,
+                "cctp_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cctp_cross_chain_token_transfers_repo,
+                "cctp_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
 
         except Exception as e:
             exception = CustomException(
@@ -59,14 +104,11 @@ class CctpGenerator(BaseGenerator):
             )
             log_error(self.bridge, exception)
 
-
     def match_token_transfers(self):
         func_name = "match_token_transfers"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching token transfers...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching token transfers..."))
 
         self.cctp_cross_chain_token_transfers_repo.empty_table()
 
@@ -124,7 +166,7 @@ class CctpGenerator(BaseGenerator):
             AND deposit.depositor = fill.depositor
             AND deposit.recipient = fill.recipient
             AND deposit.burn_token = fill.input_token;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -136,7 +178,10 @@ class CctpGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -145,14 +190,11 @@ class CctpGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-
+            ) from e
 
     def populate_token_info_tables(self, cctxs, start_ts, end_ts):
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Fetching token prices...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Fetching token prices..."))
 
         for cctx in cctxs:
             self.price_generator.populate_token_info(
@@ -166,7 +208,7 @@ class CctpGenerator(BaseGenerator):
                 start_ts,
                 end_ts,
             )
-        
+
         end_time = time.time()
         log_to_cli(
             build_log_message_generator(

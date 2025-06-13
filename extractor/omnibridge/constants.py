@@ -29,9 +29,9 @@ BRIDGE_CONFIG = {
                 ],
                 "topics": [
                     "0x1d491a427d1f8cc0d447496f300fac39f7306122481d8e663451eb268274146b",  # UserRequestForAffirmation (address recipient, uint256 value)
-                    "0x4ab7d581336d92edbea22636a613e8e76c99ac7f91137c1523db38dbfb3bf329"   # RelayedMessage (address recipient, uint256 value, bytes32 transactionHash)
+                    "0x4ab7d581336d92edbea22636a613e8e76c99ac7f91137c1523db38dbfb3bf329",  # RelayedMessage (address recipient, uint256 value, bytes32 transactionHash)
                 ],
-            }
+            },
         ],
         "gnosis": [
             {

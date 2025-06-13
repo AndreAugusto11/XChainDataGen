@@ -1116,7 +1116,7 @@ BRIDGE_CONFIG = {
                     "0xefed6d3500546b29533b128a29e3a94d70788727f0507505ac12eaf2e578fd9c",  # OFTReceived
                 ],
             },
-        ]
+        ],
     }
 }
 
@@ -1170,7 +1170,7 @@ BLOCKCHAIN_IDS = {
     "30214": {
         "nativeChainId": 534352,
         "name": "scroll",
-    }
+    },
 }
 
 STARGATE_POOL_TOKEN_MAPPING = {
@@ -1245,7 +1245,7 @@ STARGATE_POOL_TOKEN_MAPPING = {
     "scroll": {
         "0xc2b638cb5042c1b3c5d5c969361fb50569840583": "0x5300000000000000000000000000000000000004",  # Stargate Pool Native
         "0x3fc69cc4a842838bcdc9499178740226062b14e4": "0x1d738a3436a8c49ceffbab7fbf04b660fb528cbd",  # Stargate Pool USDC
-    }
+    },
 }
 
 STARGATE_OFT_TOKEN_MAPPING = {
@@ -1396,5 +1396,5 @@ STARGATE_OFT_TOKEN_MAPPING = {
         "0xd2012fc1b913ce50732ebcaa7e601fe37ac728c6": "0xd2012fc1b913ce50732ebcaa7e601fe37ac728c6",
         "0xf544251d25f3d243a36b07e7e7962a678f952691": "0xf544251d25f3d243a36b07e7e7962a678f952691",
         "0x9483ab65847a447e36d21af1cab8c87e9712ff93": "0x9483ab65847a447e36d21af1cab8c87e9712ff93",
-    }
+    },
 }

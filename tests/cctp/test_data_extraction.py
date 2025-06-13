@@ -1,12 +1,14 @@
 import argparse
+
 from cli import Cli
+
 
 def test_extract_data():
     args = argparse.Namespace(
         blockchains=["ethereum", "arbitrum", "avalanche", "polygon", "optimism", "base"],
         bridge="cctp",
         start_ts=1735689600,  # 1st Dec 2024 00:00
-        end_ts=1735776000,    # 2nd Jan 2024 00:00
+        end_ts=1735776000,  # 2nd Jan 2024 00:00
     )
 
     Cli.extract_data(args)
@@ -29,9 +31,11 @@ def test_extract_data():
     # Here we can check if the data was generated correctly
     from repository.cctp.repository import CctpCrossChainTransactionsRepository
     from repository.database import DBSession
-    
+
     cctp_cross_chain_transactions_repo = CctpCrossChainTransactionsRepository(DBSession)
     transactions = cctp_cross_chain_transactions_repo.get_all()
 
     print(f"Number of transactions in CCTPCrossChainTransactions: {len(transactions)}")
-    assert len(transactions) == 2619, "Expected 2619 events in CCTPCrossChainTransactions table after extraction."
+    assert len(transactions) == 2619, (
+        "Expected 2619 events in CCTPCrossChainTransactions table after extraction."
+    )

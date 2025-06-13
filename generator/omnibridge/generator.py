@@ -5,11 +5,32 @@ from sqlalchemy import text
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.common.repository import *
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from repository.omnibridge.repository import *
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from repository.omnibridge.repository import (
+    OmnibridgeAffirmationCompletedRepository,
+    OmnibridgeBlockchainTransactionRepository,
+    OmnibridgeCrossChainTransactionsRepository,
+    OmnibridgeOperatorTransactionsRepository,
+    OmnibridgeRelayedMessageRepository,
+    OmnibridgeSignedForAffirmationRepository,
+    OmnibridgeSignedForUserRequestRepository,
+    OmnibridgeTokensBridgedRepository,
+    OmnibridgeTokensBridgingInitiatedRepository,
+    OmnibridgeUserRequestForAffirmationRepository,
+    OmnibridgeUserRequestForSignatureRepository,
+)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class OmnibridgeGenerator(BaseGenerator):
@@ -27,9 +48,13 @@ class OmnibridgeGenerator(BaseGenerator):
         self.relayed_message_repo = OmnibridgeRelayedMessageRepository(DBSession)
         self.signed_for_user_request_repo = OmnibridgeSignedForUserRequestRepository(DBSession)
         self.signed_for_affirmation_repo = OmnibridgeSignedForAffirmationRepository(DBSession)
-        self.user_request_for_signature_repo = OmnibridgeUserRequestForSignatureRepository(DBSession)
+        self.user_request_for_signature_repo = OmnibridgeUserRequestForSignatureRepository(
+            DBSession
+        )
         self.affirmation_completed_repo = OmnibridgeAffirmationCompletedRepository(DBSession)
-        self.user_request_for_affirmation_repo = OmnibridgeUserRequestForAffirmationRepository(DBSession)
+        self.user_request_for_affirmation_repo = OmnibridgeUserRequestForAffirmationRepository(
+            DBSession
+        )
 
         self.xdai_cross_chain_transactions = OmnibridgeCrossChainTransactionsRepository(DBSession)
         self.operator_transactions = OmnibridgeOperatorTransactionsRepository(DBSession)
@@ -50,18 +75,68 @@ class OmnibridgeGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             ## POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
             cctxs = self.xdai_cross_chain_transactions.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
-            # a lot of token addresses in Gnosis are not being recognized by alchemy, so we fetch from both the src and dst blockchains, to make sure we use the Ethereum contracts
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.xdai_cross_chain_transactions, "omnibridge_cross_chain_transactions", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.xdai_cross_chain_transactions, "omnibridge_cross_chain_transactions", "amount", "dst_blockchain", "dst_contract_address", "dst_timestamp", "amount_usd")
+            # a lot of token addresses in Gnosis are not being recognized by alchemy, so we fetch
+            # from both the src and dst blockchains, to make sure we use the Ethereum contracts
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.xdai_cross_chain_transactions,
+                "omnibridge_cross_chain_transactions",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.xdai_cross_chain_transactions,
+                "omnibridge_cross_chain_transactions",
+                "amount",
+                "dst_blockchain",
+                "dst_contract_address",
+                "dst_timestamp",
+                "amount_usd",
+            )
 
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.xdai_cross_chain_transactions, "omnibridge_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee",  "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.xdai_cross_chain_transactions, "omnibridge_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee",  "dst_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.operator_transactions, "omnibridge_operator_transactions", "timestamp", "blockchain", "fee",  "fee_usd")
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.xdai_cross_chain_transactions,
+                "omnibridge_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.xdai_cross_chain_transactions,
+                "omnibridge_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.operator_transactions,
+                "omnibridge_operator_transactions",
+                "timestamp",
+                "blockchain",
+                "fee",
+                "fee_usd",
+            )
 
         except Exception as e:
             exception = CustomException(
@@ -71,19 +146,16 @@ class OmnibridgeGenerator(BaseGenerator):
             )
             log_error(self.bridge, exception)
 
-
     def match_xdai_cctxs(self):
         func_name = "match_xdai_cctxs"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching xDAI token transfers...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching xDAI token transfers..."))
 
         self.xdai_cross_chain_transactions.empty_table()
 
         query_gnosis_to_ethereum = text(
-        """
+            """
             INSERT INTO omnibridge_cross_chain_transactions (
                 src_blockchain,
                 src_transaction_hash,
@@ -134,11 +206,11 @@ class OmnibridgeGenerator(BaseGenerator):
             JOIN omnibridge_relayed_message fill ON fill.recipient = deposit.recipient AND fill.value = deposit.value AND fill.src_transaction_hash = src_tx.transaction_hash
             JOIN omnibridge_blockchain_transaction dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
             WHERE deposit.value is not NULL AND deposit.recipient is not NULL;
-        """
+        """  # noqa: E501
         )
 
         query_ethereum_to_gnosis = text(
-        """
+            """
             INSERT INTO omnibridge_cross_chain_transactions (
                 src_blockchain,
                 src_transaction_hash,
@@ -189,7 +261,7 @@ class OmnibridgeGenerator(BaseGenerator):
             JOIN omnibridge_affirmation_completed fill ON fill.recipient = deposit.recipient AND fill.value = deposit.value AND fill.src_transaction_hash = src_tx.transaction_hash
             JOIN omnibridge_blockchain_transaction dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
             WHERE deposit.value is not NULL AND deposit.recipient is not NULL;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -202,7 +274,10 @@ class OmnibridgeGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -211,8 +286,7 @@ class OmnibridgeGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-
+            ) from e
 
     def match_omnibridge_cctxs(self):
         func_name = "match_omnibridge_cctxs"
@@ -223,7 +297,7 @@ class OmnibridgeGenerator(BaseGenerator):
         )
 
         query_gnosis_to_ethereum = text(
-        """
+            """
             INSERT INTO omnibridge_cross_chain_transactions (
                 src_blockchain,
                 src_transaction_hash,
@@ -275,11 +349,11 @@ class OmnibridgeGenerator(BaseGenerator):
             JOIN omnibridge_tokens_bridged fill ON fill.message_id = deposit2.message_id AND fill.value = deposit2.value
             JOIN omnibridge_blockchain_transaction dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
             WHERE deposit.message_id is not NULL AND deposit.encoded_data is not NULL;
-        """
+        """  # noqa: E501
         )
 
         query_ethereum_to_gnosis = text(
-        """
+            """
             INSERT INTO omnibridge_cross_chain_transactions (
                 src_blockchain,
                 src_transaction_hash,
@@ -331,7 +405,7 @@ class OmnibridgeGenerator(BaseGenerator):
             JOIN omnibridge_tokens_bridged fill ON fill.message_id = deposit2.message_id AND fill.value = deposit2.value
             JOIN omnibridge_blockchain_transaction dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
             WHERE deposit.message_id is not NULL AND deposit.encoded_data is not NULL;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -344,7 +418,10 @@ class OmnibridgeGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -353,8 +430,8 @@ class OmnibridgeGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-        
+            ) from e
+
     def match_operator_cctxs(self):
         func_name = "match_operator_cctxs"
 
@@ -367,7 +444,7 @@ class OmnibridgeGenerator(BaseGenerator):
         self.operator_transactions.empty_table()
 
         query = text(
-        """
+            """
             INSERT INTO omnibridge_operator_transactions (
                 blockchain,
                 transaction_hash,
@@ -403,7 +480,10 @@ class OmnibridgeGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Operator transactions matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Operator transactions matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -412,14 +492,11 @@ class OmnibridgeGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token. Error: {e}",
-            )
-        
+            ) from e
 
     def populate_token_info_tables(self, cctxs, start_ts, end_ts):
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Fetching token prices...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Fetching token prices..."))
 
         for cctx in cctxs:
             self.price_generator.populate_token_info(
@@ -433,7 +510,7 @@ class OmnibridgeGenerator(BaseGenerator):
                 start_ts,
                 end_ts,
             )
-        
+
         end_time = time.time()
         log_to_cli(
             build_log_message_generator(

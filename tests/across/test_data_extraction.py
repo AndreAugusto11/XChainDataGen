@@ -1,12 +1,14 @@
 import argparse
+
 from cli import Cli
+
 
 def test_extract_data():
     args = argparse.Namespace(
         blockchains=["ethereum", "arbitrum", "polygon", "optimism", "base", "scroll", "linea"],
         bridge="across",
         start_ts=1733011200,  # 1st Dec 2024 00:00
-        end_ts=1733014800,    # 1st Dec 2024 01:00
+        end_ts=1733014800,  # 1st Dec 2024 01:00
     )
 
     Cli.extract_data(args)
@@ -21,7 +23,9 @@ def test_extract_data():
     events = across_v3_funds_deposited.get_all()
 
     print(f"Number of events in AcrossV3FundsDeposited: {len(events)}")
-    assert len(events) == 911, "Expected 911 events in AcrossV3FundsDepositedRepository table after extraction."
+    assert len(events) == 911, (
+        "Expected 911 events in AcrossV3FundsDepositedRepository table after extraction."
+    )
 
     args = argparse.Namespace(
         bridge="across",
@@ -31,9 +35,11 @@ def test_extract_data():
     # Here we can check if the data was generated correctly
     from repository.across.repository import AcrossCrossChainTransactionRepository
     from repository.database import DBSession
-    
+
     across_cross_chain_transactions_repo = AcrossCrossChainTransactionRepository(DBSession)
     transactions = across_cross_chain_transactions_repo.get_all()
 
     print(f"Number of transactions in AcrossCrossChainTransaction: {len(transactions)}")
-    assert len(transactions) == 900, "Expected 900 events in AcrossCrossChainTransaction table after extraction."
+    assert len(transactions) == 900, (
+        "Expected 900 events in AcrossCrossChainTransaction table after extraction."
+    )

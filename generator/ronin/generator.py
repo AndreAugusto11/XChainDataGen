@@ -5,11 +5,27 @@ from sqlalchemy import text
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.common.repository import *
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from repository.ronin.repository import *
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from repository.ronin.repository import (
+    RoninBlockchainTransactionRepository,
+    RoninCrossChainTransactionRepository,
+    RoninDepositRequestedRepository,
+    RoninTokenDepositedRepository,
+    RoninTokenWithdrewRepository,
+    RoninWithdrawalRequestedRepository,
+)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class RoninGenerator(BaseGenerator):
@@ -43,19 +59,60 @@ class RoninGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             # POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
-            # The Ronin blockchain is not supported by the Alchemy API, so we need to make some additions to the database manually
+            # The Ronin blockchain is not supported by the Alchemy API, so we need to make some
+            # additions to the database manually
             self.fetch_ronin_data()
 
             cctxs = self.cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_transactions_repo, "ronin_cross_chain_transactions", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_transactions_repo, "ronin_cross_chain_transactions", "amount", "dst_blockchain", "dst_contract_address", "dst_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_transactions_repo, "ronin_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee", "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_transactions_repo, "ronin_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee", "dst_fee_usd")
-
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ronin_cross_chain_transactions",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ronin_cross_chain_transactions",
+                "amount",
+                "dst_blockchain",
+                "dst_contract_address",
+                "dst_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ronin_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ronin_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
 
         except Exception as e:
             exception = CustomException(
@@ -64,7 +121,6 @@ class RoninGenerator(BaseGenerator):
                 f"Error processing cross chain transactions. Error: {e}",
             )
             log_error(self.bridge, exception)
-
 
     def match_deposits(self):
         func_name = "match_deposits"
@@ -165,7 +221,7 @@ class RoninGenerator(BaseGenerator):
             AND withdrawal.recipient = fill.recipient
             AND withdrawal.input_token = fill.input_token
             AND withdrawal.output_token = fill.output_token);
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -177,7 +233,10 @@ class RoninGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -186,14 +245,11 @@ class RoninGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-
+            ) from e
 
     def populate_token_info_tables(self, cctxs, start_ts, end_ts):
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Fetching token prices...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Fetching token prices..."))
 
         for cctx in cctxs:
             self.price_generator.populate_token_info(
@@ -207,7 +263,7 @@ class RoninGenerator(BaseGenerator):
                 start_ts,
                 end_ts,
             )
-        
+
         end_time = time.time()
         log_to_cli(
             build_log_message_generator(
@@ -217,23 +273,25 @@ class RoninGenerator(BaseGenerator):
             CliColor.SUCCESS,
         )
 
-
     def fetch_ronin_data(self):
-
         if not self.native_token_repo.get_native_token_by_blockchain("ronin"):
-            self.native_token_repo.create({
-                "symbol": "AXS",
-                "blockchain": "ronin",
-            })
+            self.native_token_repo.create(
+                {
+                    "symbol": "AXS",
+                    "blockchain": "ronin",
+                }
+            )
 
         if not self.token_metadata_repo.get_token_metadata_by_symbol("AXS"):
-            self.token_metadata_repo.create({
-                "symbol": "AXS",
-                "name": "Axie Infinity",
-                "decimals": 18,
-                "blockchain": "ronin",
-                "address": None,
-            })
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "AXS",
+                    "name": "Axie Infinity",
+                    "decimals": 18,
+                    "blockchain": "ronin",
+                    "address": None,
+                }
+            )
 
             # we don't fetch the price of AXS because it will be fetched
             # through Alchemy using the AXS token on Ethereum later on

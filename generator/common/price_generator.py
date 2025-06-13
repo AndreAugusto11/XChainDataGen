@@ -4,22 +4,27 @@ from datetime import datetime, timedelta
 from sqlalchemy import text
 
 from config.constants import BLOCKCHAIN_IDS
-from repository.common.repository import (NativeTokenRepository,
-                                          TokenMetadataRepository,
-                                          TokenPriceRepository)
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from utils.rpc_utils import RPCClient
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator,
-                         get_blockchain_native_token_symbol, log_error,
-                         log_to_cli)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    get_blockchain_native_token_symbol,
+    log_error,
+    log_to_cli,
+)
 
 
-class PriceGenerator():
+class PriceGenerator:
     CLASS_NAME = "PriceGenerator"
 
     def __init__(self):
-        self.pairs_tried = {} # {blockchain: [token_contracts, ...]}
-
+        self.pairs_tried = {}  # {blockchain: [token_contracts, ...]}
 
     def populate_native_tokens(
         bridge: str,
@@ -27,12 +32,12 @@ class PriceGenerator():
         token_metadata_repo: TokenMetadataRepository,
         token_price_repo: TokenPriceRepository,
         start_ts: str,
-        end_ts: str
+        end_ts: str,
     ):
         log_to_cli(
             build_log_message_generator(
                 bridge,
-                f"Fetching prices for native tokens...",
+                "Fetching prices for native tokens...",
             ),
             CliColor.INFO,
         )
@@ -51,29 +56,48 @@ class PriceGenerator():
                 record = native_token_repo.get_native_token_by_blockchain(blockchain)
 
                 symbol = get_blockchain_native_token_symbol(blockchain)
-                
+
                 if record is None:
-                    rows.append({
-                        "symbol": symbol,
-                        "blockchain": blockchain,
-                    })
+                    rows.append(
+                        {
+                            "symbol": symbol,
+                            "blockchain": blockchain,
+                        }
+                    )
 
                 token_metadata = token_metadata_repo.get_token_metadata_by_symbol(symbol)
                 name = token_metadata.name if token_metadata is not None else None
-                
+
                 if token_metadata is None:
-                    token_metadata = PriceGenerator.fetch_and_store_token_metadata(bridge, token_metadata_repo, blockchain, metadata["native_token_contract"], None)
+                    token_metadata = PriceGenerator.fetch_and_store_token_metadata(
+                        bridge,
+                        token_metadata_repo,
+                        blockchain,
+                        metadata["native_token_contract"],
+                        None,
+                    )
 
                     name = token_metadata["name"]
 
-                completed, dates =  PriceGenerator.is_token_price_complete(token_price_repo, start_ts, end_ts, symbol, name)
+                completed, dates = PriceGenerator.is_token_price_complete(
+                    token_price_repo, start_ts, end_ts, symbol, name
+                )
 
                 if not completed:
                     if dates is None:
-                        PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, start_ts, end_ts, name=name, symbol=symbol)
+                        PriceGenerator.fetch_and_store_token_prices(
+                            bridge, token_price_repo, start_ts, end_ts, name=name, symbol=symbol
+                        )
                     else:
                         for [_start_ts, _end_ts] in dates:
-                            PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, _start_ts, _end_ts, name=name, symbol=symbol)
+                            PriceGenerator.fetch_and_store_token_prices(
+                                bridge,
+                                token_price_repo,
+                                _start_ts,
+                                _end_ts,
+                                name=name,
+                                symbol=symbol,
+                            )
 
             if len(rows) > 0:
                 native_token_repo.create_all(rows)
@@ -82,9 +106,8 @@ class PriceGenerator():
             raise CustomException(
                 PriceGenerator.CLASS_NAME,
                 "populate_native_tokens",
-                f"Error while populating native tokens: {str(e)}"
-            )
-
+                f"Error while populating native tokens: {str(e)}",
+            ) from e
 
     def populate_token_info(
         self,
@@ -97,23 +120,37 @@ class PriceGenerator():
         output_token: str,
         start_ts: str,
         end_ts: str,
-        src_contract_address: str = None, # these exist to store the contract being used in the bridge that is not the token itself (e.g. a liquidity pool based on the token)
-        dst_contract_address: str = None # these exist to store the contract being used in the bridge that is not the token itself (e.g. a liquidity pool based on the token)
+        # src_contract_address and dst_contract_address exist to store the contract being used in
+        # the bridge that is not the token itself (e.g. a liquidity pool based on the token)
+        src_contract_address: str = None,
+        dst_contract_address: str = None,
     ):
-
         try:
-            src_token_metadata = token_metadata_repo.get_token_metadata_by_contract_and_blockchain(src_contract_address if src_contract_address is not None else input_token, src_blockchain)
-            dst_token_metadata = token_metadata_repo.get_token_metadata_by_contract_and_blockchain(dst_contract_address if dst_contract_address is not None else output_token, dst_blockchain)
+            src_token_metadata = token_metadata_repo.get_token_metadata_by_contract_and_blockchain(
+                src_contract_address if src_contract_address is not None else input_token,
+                src_blockchain,
+            )
+            dst_token_metadata = token_metadata_repo.get_token_metadata_by_contract_and_blockchain(
+                dst_contract_address if dst_contract_address is not None else output_token,
+                dst_blockchain,
+            )
 
             if input_token is None:
-                # in this case, there is no token recorded in the cctx, therefore we cannot fetch the token metadata
+                # in this case, there is no token recorded in the cctx, therefore we cannot fetch
+                # the token metadata
                 pass
             else:
                 if src_token_metadata is None:
-                    metadata = PriceGenerator.fetch_and_store_token_metadata(bridge, token_metadata_repo, src_blockchain, input_token, src_contract_address)
+                    metadata = PriceGenerator.fetch_and_store_token_metadata(
+                        bridge,
+                        token_metadata_repo,
+                        src_blockchain,
+                        input_token,
+                        src_contract_address,
+                    )
                     if metadata is None:
                         return
-                    
+
                     token_symbol = metadata["symbol"]
                     token_name = metadata["name"]
                 else:
@@ -121,23 +158,50 @@ class PriceGenerator():
                     token_name = src_token_metadata.name
 
                 # check if we have already fetched the token prices for this symbol
-                completed, dates = PriceGenerator.is_token_price_complete(token_price_repo, start_ts, end_ts, token_symbol, token_name)
-                
+                completed, dates = PriceGenerator.is_token_price_complete(
+                    token_price_repo, start_ts, end_ts, token_symbol, token_name
+                )
+
                 if not completed and not self.has_tried_contract(src_blockchain, input_token):
-                    if dates == None:
-                        PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, start_ts, end_ts, name=token_name, symbol=token_symbol, blockchain=src_blockchain, token_address=input_token)
+                    if dates is None:
+                        PriceGenerator.fetch_and_store_token_prices(
+                            bridge,
+                            token_price_repo,
+                            start_ts,
+                            end_ts,
+                            name=token_name,
+                            symbol=token_symbol,
+                            blockchain=src_blockchain,
+                            token_address=input_token,
+                        )
                     else:
                         for [_start_ts, _end_ts] in dates:
-                            PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, _start_ts, _end_ts, name=token_name, symbol=token_symbol, blockchain=src_blockchain, token_address=input_token)
-                    
+                            PriceGenerator.fetch_and_store_token_prices(
+                                bridge,
+                                token_price_repo,
+                                _start_ts,
+                                _end_ts,
+                                name=token_name,
+                                symbol=token_symbol,
+                                blockchain=src_blockchain,
+                                token_address=input_token,
+                            )
+
                     self.update_pairs_tried(src_blockchain, input_token)
 
             if output_token is None:
-                # in this case, there is no token recorded in the cctx, therefore we cannot fetch the token metadata
+                # in this case, there is no token recorded in the cctx, therefore we cannot fetch
+                # the token metadata
                 pass
             else:
                 if dst_token_metadata is None:
-                    metadata = PriceGenerator.fetch_and_store_token_metadata(bridge, token_metadata_repo, dst_blockchain, output_token, dst_contract_address)
+                    metadata = PriceGenerator.fetch_and_store_token_metadata(
+                        bridge,
+                        token_metadata_repo,
+                        dst_blockchain,
+                        output_token,
+                        dst_contract_address,
+                    )
                     if metadata is None:
                         return
 
@@ -148,23 +212,46 @@ class PriceGenerator():
                     token_name = src_token_metadata.name
 
                 # check if we have already fetched the token prices for this symbol
-                completed, dates = PriceGenerator.is_token_price_complete(token_price_repo, start_ts, end_ts, token_symbol, token_name)
+                completed, dates = PriceGenerator.is_token_price_complete(
+                    token_price_repo, start_ts, end_ts, token_symbol, token_name
+                )
 
                 if not completed and not self.has_tried_contract(dst_blockchain, output_token):
-                    if dates == None:
-                        PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, start_ts, end_ts, name=token_name, symbol=token_symbol, blockchain=dst_blockchain, token_address=output_token)
+                    if dates is None:
+                        PriceGenerator.fetch_and_store_token_prices(
+                            bridge,
+                            token_price_repo,
+                            start_ts,
+                            end_ts,
+                            name=token_name,
+                            symbol=token_symbol,
+                            blockchain=dst_blockchain,
+                            token_address=output_token,
+                        )
                     else:
-                        for [_start_ts, _end_ts] in dates:        
-                            PriceGenerator.fetch_and_store_token_prices(bridge, token_price_repo, _start_ts, _end_ts, name=token_name, symbol=token_symbol, blockchain=dst_blockchain, token_address=output_token)
-                    
+                        for [_start_ts, _end_ts] in dates:
+                            PriceGenerator.fetch_and_store_token_prices(
+                                bridge,
+                                token_price_repo,
+                                _start_ts,
+                                _end_ts,
+                                name=token_name,
+                                symbol=token_symbol,
+                                blockchain=dst_blockchain,
+                                token_address=output_token,
+                            )
+
                     self.update_pairs_tried(dst_blockchain, output_token)
         except Exception as e:
             exception = CustomException(
                 self.CLASS_NAME,
                 "populate_token_info",
-                f"Error while populating token info for {input_token} ({src_blockchain}) and {output_token} ({dst_blockchain}): {str(e)}"
+                (
+                    f"Error while populating token info for {input_token} ({src_blockchain}) and "
+                    f"{output_token} ({dst_blockchain}): {str(e)}",
+                ),
             )
-        
+
             log_error(bridge, exception)
 
     def fetch_and_store_token_metadata(
@@ -172,7 +259,9 @@ class PriceGenerator():
         token_metadata_repo: TokenMetadataRepository,
         blockchain: str,
         token_contract: str,
-        contract_address: str, # these exist to store the contract being used in the bridge that is not the token itself (e.g. a liquidity pool based on the token)
+        # contract_address exists to store the contract being used in
+        # the bridge that is not the token itself (e.g. a liquidity pool based on the token)
+        contract_address: str,
     ):
         log_to_cli(
             build_log_message_generator(
@@ -189,16 +278,17 @@ class PriceGenerator():
 
         metadata["symbol"] = metadata["symbol"].upper()
 
-        token_metadata_repo.create({
-            "symbol": metadata["symbol"],
-            "name": metadata["name"],
-            "decimals": metadata["decimals"] if metadata["decimals"] else 1,
-            "blockchain": blockchain,
-            "address": token_contract if contract_address is None else contract_address,
-        })
+        token_metadata_repo.create(
+            {
+                "symbol": metadata["symbol"],
+                "name": metadata["name"],
+                "decimals": metadata["decimals"] if metadata["decimals"] else 1,
+                "blockchain": blockchain,
+                "address": token_contract if contract_address is None else contract_address,
+            }
+        )
 
         return metadata
-
 
     def fetch_and_store_token_prices(
         bridge: str,
@@ -208,7 +298,7 @@ class PriceGenerator():
         name: str,
         symbol: str = None,
         blockchain: str = None,
-        token_address: str = None
+        token_address: str = None,
     ):
         log_to_cli(
             build_log_message_generator(
@@ -218,50 +308,64 @@ class PriceGenerator():
             CliColor.INFO,
         )
 
-        if symbol and ('usd' in symbol.lower() or 'dai' in symbol.lower() or 'frax' in symbol.lower()):
+        if symbol and (
+            "usd" in symbol.lower() or "dai" in symbol.lower() or "frax" in symbol.lower()
+        ):
             rows = []
             current_ts = start_ts
             one_day = 86400  # seconds in a day
             while current_ts <= end_ts:
                 date = datetime.fromtimestamp(current_ts)
-                rows.append({
-                    "symbol": symbol,
-                    "name": name,
-                    "date": date,
-                    "price_usd": 1.0,
-                })
+                rows.append(
+                    {
+                        "symbol": symbol,
+                        "name": name,
+                        "date": date,
+                        "price_usd": 1.0,
+                    }
+                )
                 current_ts += one_day
 
             token_price_repo.create_all(rows)
             return
 
         if blockchain is None and token_address is None:
-            token_prices = RPCClient.get_token_prices_by_symbol_or_address(start_ts, end_ts, symbol=symbol)
+            token_prices = RPCClient.get_token_prices_by_symbol_or_address(
+                start_ts, end_ts, symbol=symbol
+            )
         else:
-            token_prices = RPCClient.get_token_prices_by_symbol_or_address(start_ts, end_ts, blockchain=blockchain, token_address=token_address)
+            token_prices = RPCClient.get_token_prices_by_symbol_or_address(
+                start_ts, end_ts, blockchain=blockchain, token_address=token_address
+            )
 
         if token_prices is None or "data" not in token_prices:
             return
 
         rows = []
         for pair in token_prices["data"]:
-
-            date_struct = time.strptime(pair["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
+            date_struct = time.strptime(pair["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
             date = datetime.fromtimestamp(time.mktime(date_struct))
 
-            rows.append({
-                "symbol": symbol,
-                "name": name,
-                "date": date,
-                "price_usd": pair["value"],
-            })
+            rows.append(
+                {
+                    "symbol": symbol,
+                    "name": name,
+                    "date": date,
+                    "price_usd": pair["value"],
+                }
+            )
 
         token_price_repo.create_all(rows)
 
-
-    def is_token_price_complete(token_price_repo: TokenPriceRepository, start_ts: str, end_ts: str, symbol: str, name: str):
-        days_diff = (datetime.fromtimestamp(end_ts).date() - datetime.fromtimestamp(start_ts).date()).days + 1 # inclusive of start and end dates
-        db_data = token_price_repo.get_count_datapoints_for_symbol_and_name_between_dates(symbol, name, start_ts, end_ts)
+    def is_token_price_complete(
+        token_price_repo: TokenPriceRepository, start_ts: str, end_ts: str, symbol: str, name: str
+    ):
+        days_diff = (
+            datetime.fromtimestamp(end_ts).date() - datetime.fromtimestamp(start_ts).date()
+        ).days + 1  # inclusive of start and end dates
+        db_data = token_price_repo.get_count_datapoints_for_symbol_and_name_between_dates(
+            symbol, name, start_ts, end_ts
+        )
 
         if db_data == 0 or db_data is None:
             return False, None
@@ -291,24 +395,23 @@ class PriceGenerator():
 
         return False, dates
 
-
     def update_pairs_tried(self, blockchain, token):
         if blockchain in self.pairs_tried:
             self.pairs_tried[blockchain].append(token)
         else:
             self.pairs_tried[blockchain] = [token]
 
-
     def has_tried_contract(self, blockchain, contract):
-        if not blockchain in self.pairs_tried:
+        if blockchain not in self.pairs_tried:
             return False
         return contract in self.pairs_tried[blockchain]
-
 
     def create_null_token_prices(token_price_repo, start_ts, end_ts):
         """used to populate token prices for unmapped tokens with invalid symbols"""
 
-        completed, _ = PriceGenerator.is_token_price_complete(token_price_repo, start_ts, end_ts, "", "")
+        completed, _ = PriceGenerator.is_token_price_complete(
+            token_price_repo, start_ts, end_ts, "", ""
+        )
 
         if completed:
             return
@@ -318,12 +421,14 @@ class PriceGenerator():
 
         rows = []
         while start_date <= end_date:
-            rows.append({
-                "symbol": "",
-                "name": "",
-                "date": start_date,
-                "price_usd": 0,
-            })
+            rows.append(
+                {
+                    "symbol": "",
+                    "name": "",
+                    "date": start_date,
+                    "price_usd": 0,
+                }
+            )
             start_date += timedelta(days=1)
 
         token_price_repo.create_all(rows)
@@ -336,7 +441,7 @@ class PriceGenerator():
         blockchain_field_name: str,
         contract_address_field_name: str,
         timestamp_field_name: str,
-        usd_value_field_name: str
+        usd_value_field_name: str,
     ):
         func_name = "calculate_cctx_usd_values"
 
@@ -359,7 +464,7 @@ class PriceGenerator():
                 WHERE lower(cctx.{contract_address_field_name}) = lower(token_metadata.address)
                 AND cctx.{blockchain_field_name} = token_metadata.blockchain
                 AND CAST(TO_TIMESTAMP(cctx.{timestamp_field_name}) AS DATE) = token_price.date;
-            """
+            """  # noqa: E501
         )
 
         try:
@@ -372,8 +477,11 @@ class PriceGenerator():
             end_time = time.time()
             log_to_cli(
                 build_log_message_generator(
-                bridge,
-                f"Calculated USD values for {table_name} in {end_time - start_time} seconds. Total value: {formatted_total_value}",
+                    bridge,
+                    (
+                        f"Calculated USD values for {table_name} in {end_time - start_time} seconds"
+                        f". Total value: {formatted_total_value}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -382,8 +490,7 @@ class PriceGenerator():
                 PriceGenerator.CLASS_NAME,
                 func_name,
                 f"Error processing USD values for {amount_field_name} in {table_name}. Error: {e}",
-            )
-
+            ) from e
 
     def calculate_cctx_native_usd_values(
         bridge: str,
@@ -392,7 +499,7 @@ class PriceGenerator():
         timestamp_field_name: str,
         blockchain_field_name: str,
         fee_field_name: str,
-        usd_fee_field_name: str
+        usd_fee_field_name: str,
     ):
         func_name = "calculate_cctx_native_usd_values"
 
@@ -418,7 +525,7 @@ class PriceGenerator():
             WHERE
                 cctx.{blockchain_field_name} = native_token.blockchain
                 AND CAST(TO_TIMESTAMP(cctx.{timestamp_field_name}) AS DATE) = token_price.date;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -427,8 +534,11 @@ class PriceGenerator():
             end_time = time.time()
             log_to_cli(
                 build_log_message_generator(
-                bridge,
-                f"Calculating USD values for {fee_field_name} in {table_name}... Completed in {end_time - start_time} seconds.",
+                    bridge,
+                    (
+                        f"Calculating USD values for {fee_field_name} in {table_name}... "
+                        f"Completed in {end_time - start_time} seconds.",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -437,4 +547,4 @@ class PriceGenerator():
                 PriceGenerator.CLASS_NAME,
                 func_name,
                 f"Error processing USD values for {table_name}. Error: {e}",
-            )
+            ) from e

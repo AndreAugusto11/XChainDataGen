@@ -15,14 +15,17 @@ def generate_rpc_configs(blockchain: list):
 
 def test_rpcs(configs, blockchains):
     """
-    Tests the RPC endpoints for each blockchain configuration provided and removes the ones that are not available.
+    Tests the RPC endpoints for each blockchain configuration provided and removes the ones that are
+    not available.
 
-    The function iterates through the list of blockchain configurations, sends a request to each RPC endpoint, 
-    and checks if logs are returned. If no logs are found, the RPC endpoint is considered unavailable and is removed 
-    from the list. The final configurations with available RPCs are then written to a YAML file.
+    The function iterates through the list of blockchain configurations, sends a request to each RPC
+    endpoint, and checks if logs are returned. If no logs are found, the RPC endpoint is considered
+    unavailable and is removed from the list. The final configurations with available RPCs are then
+    written to a YAML file.
 
     Args:
-        configs (dict): A dictionary containing blockchain configurations. Each configuration should include:
+        configs (dict): A dictionary containing blockchain configurations. Each configuration should
+        include:
             - name (str): The name of the blockchain.
             - contract (str): The contract address.
             - topics (list): The list of topics to filter logs.
@@ -34,10 +37,9 @@ def test_rpcs(configs, blockchains):
         Exception: If no logs are found for a given RPC endpoint.
 
     Outputs:
-        Writes the final configurations with available RPCs to a YAML file at './config/rpcs_config.yaml'.
+        Writes the final configurations with available RPCs to './config/rpcs_config.yaml'.
     """
     for config in configs["blockchains"]:
-
         if config["name"] not in blockchains:
             continue
 
@@ -60,13 +62,13 @@ def test_rpcs(configs, blockchains):
 
                 if "result" not in response:
                     raise Exception(f"Invalid RPC response: {response}")
-                
+
                 if "error" in response:
                     raise Exception(f"Error in RPC response: {response['error']}")
 
                 if len(response["result"]) == 0:
                     raise Exception("Something is going on here... no logs found...")
-                
+
                 rpcs.append(rpc)
 
             except Exception as e:

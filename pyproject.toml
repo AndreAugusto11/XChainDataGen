@@ -1,2 +1,17 @@
 [tool.isort]
 skip = [".xchaindata"]
+
+[tool.ruff]
+line-length = 100
+
+exclude = [
+    "**/constants.py",
+    "**/*.ipynb",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]  # Pyflakes, pycodestyle, isort, bugbear
+extend-select = ["I", "B"]
+
+[tool.ruff.format]
+quote-style = "double"

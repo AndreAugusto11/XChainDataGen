@@ -2,7 +2,12 @@ from sqlalchemy import Index, func
 
 from repository.base import BaseRepository
 
-from .models import *
+from .models import (
+    CCIPBlockchainTransaction,
+    CCIPCrossChainTransactions,
+    CCIPExecutionStateChanged,
+    CCIPSendRequested,
+)
 
 
 class CCIPSendRequestedRepository(BaseRepository):
@@ -11,9 +16,11 @@ class CCIPSendRequestedRepository(BaseRepository):
 
     def event_exists(self, message_id: str):
         with self.get_session() as session:
-            return session.query(CCIPSendRequested).filter(
-                CCIPSendRequested.message_id == message_id
-            ).first()
+            return (
+                session.query(CCIPSendRequested)
+                .filter(CCIPSendRequested.message_id == message_id)
+                .first()
+            )
 
 
 class CCIPExecutionStateChangedRepository(BaseRepository):
@@ -22,9 +29,11 @@ class CCIPExecutionStateChangedRepository(BaseRepository):
 
     def event_exists(self, message_id: str):
         with self.get_session() as session:
-            return session.query(CCIPExecutionStateChanged).filter(
-                CCIPExecutionStateChanged.message_id == message_id
-            ).first()
+            return (
+                session.query(CCIPExecutionStateChanged)
+                .filter(CCIPExecutionStateChanged.message_id == message_id)
+                .first()
+            )
 
 
 class CCIPBlockchainTransactionRepository(BaseRepository):
@@ -34,16 +43,18 @@ class CCIPBlockchainTransactionRepository(BaseRepository):
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
             return session.get(CCIPBlockchainTransaction, transaction_hash)
-    
+
     def get_min_timestamp(self):
         with self.get_session() as session:
             return session.query(func.min(CCIPBlockchainTransaction.timestamp)).scalar()
-    
+
     def get_max_timestamp(self):
         with self.get_session() as session:
             return session.query(func.max(CCIPBlockchainTransaction.timestamp)).scalar()
 
+
 ########## Processed Data ##########
+
 
 class CCIPCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -68,24 +79,29 @@ class CCIPCrossChainTransactionsRepository(BaseRepository):
 
     def get_by_src_tx_hash(self, src_tx_hash: str):
         with self.get_session() as session:
-            return session.query(CCIPCrossChainTransactions).filter(
-                CCIPCrossChainTransactions.src_transaction_hash == src_tx_hash
-            ).first()
+            return (
+                session.query(CCIPCrossChainTransactions)
+                .filter(CCIPCrossChainTransactions.src_transaction_hash == src_tx_hash)
+                .first()
+            )
 
     def get_unique_src_dst_contract_pairs(self):
         with self.get_session() as session:
-            return session.query(
-                CCIPCrossChainTransactions.src_blockchain,
-                CCIPCrossChainTransactions.src_contract_address,
-            ).group_by(
-                CCIPCrossChainTransactions.src_blockchain,
-                CCIPCrossChainTransactions.src_contract_address,
-            ).all()
-    
+            return (
+                session.query(
+                    CCIPCrossChainTransactions.src_blockchain,
+                    CCIPCrossChainTransactions.src_contract_address,
+                )
+                .group_by(
+                    CCIPCrossChainTransactions.src_blockchain,
+                    CCIPCrossChainTransactions.src_contract_address,
+                )
+                .all()
+            )
+
     def get_total_amount_usd_transacted(self):
         with self.get_session() as session:
             return session.query(func.sum(CCIPCrossChainTransactions.amount_usd)).scalar()
-    
 
 
 Index("ccip_send_requested_message_id_idx", CCIPSendRequested.message_id)

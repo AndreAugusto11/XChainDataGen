@@ -1,4 +1,3 @@
-
 from web3.contract import Contract
 
 from extractor.base_decoder import BaseDecoder
@@ -15,10 +14,8 @@ class PolygonDecoder(BaseDecoder):
         func_name = "decode_event"
 
         if log["topics"][0] == "0x103fed9db65eac19c4d870f49ab7520fe03b99f1838e5996caf47e9e43308392":
-            return contract.events.StateSynced().process_log(log)['args']
-        
+            return contract.events.StateSynced().process_log(log)["args"]
+
         raise CustomException(
-            self.CLASS_NAME,
-            func_name,
-            f"Unknown event topic: {log['topics'][0]}"
+            self.CLASS_NAME, func_name, f"Unknown event topic: {log['topics'][0]}"
         )

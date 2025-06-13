@@ -1,9 +1,15 @@
 from sqlalchemy import Index, func
-from sqlalchemy.orm import Session
 
 from repository.base import BaseRepository
 
-from .models import *
+from .models import (
+    RoninBlockchainTransaction,
+    RoninCrossChainTransaction,
+    RoninDepositRequested,
+    RoninTokenDeposited,
+    RoninTokenWithdrew,
+    RoninWithdrawalRequested,
+)
 
 
 class RoninDepositRequestedRepository(BaseRepository):
@@ -12,9 +18,12 @@ class RoninDepositRequestedRepository(BaseRepository):
 
     def event_exists(self, deposit_id: str):
         with self.get_session() as session:
-            return session.query(RoninDepositRequested).filter(
-                RoninDepositRequested.deposit_id == deposit_id
-            ).first()
+            return (
+                session.query(RoninDepositRequested)
+                .filter(RoninDepositRequested.deposit_id == deposit_id)
+                .first()
+            )
+
 
 class RoninTokenDepositedRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -22,9 +31,12 @@ class RoninTokenDepositedRepository(BaseRepository):
 
     def event_exists(self, deposit_id: int):
         with self.get_session() as session:
-            return session.query(RoninTokenDeposited).filter(
-                RoninTokenDeposited.deposit_id == deposit_id
-            ).first()
+            return (
+                session.query(RoninTokenDeposited)
+                .filter(RoninTokenDeposited.deposit_id == deposit_id)
+                .first()
+            )
+
 
 class RoninWithdrawalRequestedRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -32,9 +44,12 @@ class RoninWithdrawalRequestedRepository(BaseRepository):
 
     def event_exists(self, withdrawal_id: str):
         with self.get_session() as session:
-            return session.query(RoninWithdrawalRequested).filter(
-                RoninWithdrawalRequested.withdrawal_id == withdrawal_id
-            ).first()
+            return (
+                session.query(RoninWithdrawalRequested)
+                .filter(RoninWithdrawalRequested.withdrawal_id == withdrawal_id)
+                .first()
+            )
+
 
 class RoninTokenWithdrewRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -42,9 +57,12 @@ class RoninTokenWithdrewRepository(BaseRepository):
 
     def event_exists(self, withdrawal_id: int):
         with self.get_session() as session:
-            return session.query(RoninTokenWithdrew).filter(
-                RoninTokenWithdrew.withdrawal_id == withdrawal_id
-            ).first()
+            return (
+                session.query(RoninTokenWithdrew)
+                .filter(RoninTokenWithdrew.withdrawal_id == withdrawal_id)
+                .first()
+            )
+
 
 class RoninBlockchainTransactionRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -53,17 +71,18 @@ class RoninBlockchainTransactionRepository(BaseRepository):
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
             return session.get(RoninBlockchainTransaction, transaction_hash)
-    
+
     def get_min_timestamp(self):
         with self.get_session() as session:
             return session.query(func.min(RoninBlockchainTransaction.timestamp)).scalar()
-    
+
     def get_max_timestamp(self):
         with self.get_session() as session:
             return session.query(func.max(RoninBlockchainTransaction.timestamp)).scalar()
 
 
 ########## Processed Data ##########
+
 
 class RoninCrossChainTransactionRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -88,24 +107,30 @@ class RoninCrossChainTransactionRepository(BaseRepository):
 
     def get_by_src_tx_hash(self, src_tx_hash: str):
         with self.get_session() as session:
-            return session.query(RoninCrossChainTransaction).filter(
-            RoninCrossChainTransaction.src_transaction_hash == src_tx_hash
-        ).first()
+            return (
+                session.query(RoninCrossChainTransaction)
+                .filter(RoninCrossChainTransaction.src_transaction_hash == src_tx_hash)
+                .first()
+            )
 
     def get_unique_src_dst_contract_pairs(self):
         with self.get_session() as session:
-            return session.query(
-                RoninCrossChainTransaction.src_blockchain,
-                RoninCrossChainTransaction.src_contract_address,
-                RoninCrossChainTransaction.dst_blockchain,
-                RoninCrossChainTransaction.dst_contract_address,
-            ).group_by(
-                RoninCrossChainTransaction.src_blockchain,
-                RoninCrossChainTransaction.src_contract_address,
-                RoninCrossChainTransaction.dst_blockchain,
-                RoninCrossChainTransaction.dst_contract_address
-            ).all()
-    
+            return (
+                session.query(
+                    RoninCrossChainTransaction.src_blockchain,
+                    RoninCrossChainTransaction.src_contract_address,
+                    RoninCrossChainTransaction.dst_blockchain,
+                    RoninCrossChainTransaction.dst_contract_address,
+                )
+                .group_by(
+                    RoninCrossChainTransaction.src_blockchain,
+                    RoninCrossChainTransaction.src_contract_address,
+                    RoninCrossChainTransaction.dst_blockchain,
+                    RoninCrossChainTransaction.dst_contract_address,
+                )
+                .all()
+            )
+
     def get_total_amount_usd_transacted(self):
         with self.get_session() as session:
             return session.query(func.sum(RoninCrossChainTransaction.amount_usd)).scalar()

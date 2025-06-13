@@ -6,13 +6,22 @@ from urllib.request import BaseHandler
 from config.constants import Bridge
 from extractor.decoder import BridgeDecoder
 from utils.rpc_utils import RPCClient
-from utils.utils import (CliColor, CustomException, build_log_message,
-                         load_module, log_error, log_to_cli)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message,
+    load_module,
+    log_error,
+    log_to_cli,
+)
 
 
 class Extractor:
     """
-    Extractor is a class responsible for orchestrating the extraction of blockchain logs and transactions for a specified bridge and blockchain. It manages the division of block ranges, multi-threaded processing, dynamic handler loading, and the decoding and handling of logs and transactions.
+    Extractor is a class responsible for orchestrating the extraction of blockchain logs and
+    transactions for a specified bridge and blockchain. It manages the division of block ranges,
+    multi-threaded processing, dynamic handler loading, and the decoding and handling of logs
+    and transactions.
 
     Attributes:
         CLASS_NAME (str): The name of the class.
@@ -26,7 +35,8 @@ class Extractor:
 
     Methods:
         __init__(self, bridge: Bridge, blockchain: str):
-            Initializes the Extractor with the specified bridge and blockchain, sets up the RPC client, decoder, and handler.
+            Initializes the Extractor with the specified bridge and blockchain, sets up the RPC
+            client, decoder, and handler.
 
         load_handler(self) -> BaseHandler:
             Dynamically loads and returns the handler for the specified bridge.
@@ -35,14 +45,17 @@ class Extractor:
             Divides a block range into smaller chunks for parallel processing.
 
         work(self, contract: str, topics: list, start_block: int, end_block: int):
-            Processes logs and transactions for a given contract and block range, decodes logs, and invokes the bridge handler.
+            Processes logs and transactions for a given contract and block range, decodes logs, and
+            invokes the bridge handler.
 
         worker(self):
             Worker function for threads to process block ranges from the task queue.
 
         extract_data(self, start_block: int, end_block: int, blockchains: list):
-            Main extraction logic that validates contracts, divides block ranges, launches worker threads, and coordinates the extraction process.
+            Main extraction logic that validates contracts, divides block ranges, launches worker
+            threads, and coordinates the extraction process.
     """
+
     CLASS_NAME = "Extractor"
 
     def __init__(self, bridge: Bridge, blockchain: str, blockchains: list):
@@ -59,7 +72,6 @@ class Extractor:
         # load the bridge handler and initiate a DB session
         self.handler = self.load_handler(blockchains)
 
-
     def load_handler(self, blockchains: list) -> BaseHandler:
         """Dynamically loads the handler for the specified bridge."""
         func_name = "load_handler"
@@ -74,7 +86,7 @@ class Extractor:
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME, func_name, f"Bridge {bridge_name} not supported. {e}"
-            )
+            ) from e
 
     @staticmethod
     def divide_block_ranges(start_block: int, end_block: int, chunk_size: int = 1000):
@@ -115,7 +127,8 @@ class Extractor:
         for log in logs:
             decoded_log = self.decoder.decode(contract, self.blockchain, log)
 
-            # we take the decoded log and append more data to it, such that the handler can insert in the right DB table
+            # we take the decoded log and append more data to it, such that the handler can insert
+            #  in the right DB table
             decoded_log["transaction_hash"] = log["transactionHash"]
             decoded_log["block_number"] = log["blockNumber"]
             decoded_log["contract_address"] = contract
@@ -129,7 +142,8 @@ class Extractor:
         for log in included_logs:
             tx_hash = log["transaction_hash"]
 
-            # to avoid processing the same transaction multiple times we ignore if already in the repository
+            # to avoid processing the same transaction multiple times we ignore if already in the
+            #  repository
             try:
                 if self.handler.does_transaction_exist_by_hash(tx_hash):
                     continue
@@ -141,10 +155,15 @@ class Extractor:
                 if tx_receipt is None or block is None:
                     raise Exception(tx_hash)
 
-                txs[tx_hash] = self.handler.create_transaction_object(self.blockchain, tx_receipt, block)
+                txs[tx_hash] = self.handler.create_transaction_object(
+                    self.blockchain, tx_receipt, block
+                )
 
             except CustomException as e:
-                request_desc = f"Error processing request: {self.blockchain}, {start_block}, {end_block}, {contract}, {topics}. Error: {e}"
+                request_desc = (
+                    f"Error processing request: {self.blockchain}, {start_block}, {end_block}, "
+                    f"{contract}, {topics}. Error: {e}"
+                )
                 log_error(self.bridge, request_desc)
 
         if len(txs) > 0:
@@ -163,7 +182,10 @@ class Extractor:
                     end_block,
                 )
             except CustomException as e:
-                request_desc = f"Error processing request: {self.bridge}, {self.blockchain}, {start_block}, {end_block}, {contract}, {topics}. Error: {e}"
+                request_desc = (
+                    f"Error processing request: {self.bridge}, {self.blockchain}, {start_block}, "
+                    f"{end_block}, {contract}, {topics}. Error: {e}"
+                )
                 log_error(self.bridge, request_desc)
             finally:
                 self.task_queue.task_done()
@@ -181,9 +203,7 @@ class Extractor:
                 start_time = time.time()
                 topics = pair["topics"]
 
-                num_threads = (
-                    self.rpc_client.max_threads_per_blockchain(self.blockchain) * 2
-                )
+                num_threads = self.rpc_client.max_threads_per_blockchain(self.blockchain) * 2
 
                 chunk_size = min((end_block - start_block) // num_threads, 1000)
 
@@ -191,9 +211,7 @@ class Extractor:
                     block_ranges = self.divide_block_ranges(start_block, end_block)
                 else:
                     # Divide block ranges into smaller chunks
-                    block_ranges = self.divide_block_ranges(
-                        start_block, end_block, chunk_size
-                    )
+                    block_ranges = self.divide_block_ranges(start_block, end_block, chunk_size)
 
                 # Populate the task queue
                 for start, end in block_ranges:
@@ -207,7 +225,10 @@ class Extractor:
                         contract,
                         self.bridge,
                         self.blockchain,
-                        f"Launching {num_threads} threads to process {len(block_ranges)} block ranges...",
+                        (
+                            f"Launching {num_threads} threads to process {len(block_ranges)} block "
+                            f"ranges...",
+                        ),
                     )
                 )
                 for i in range(num_threads):
@@ -229,7 +250,10 @@ class Extractor:
                         contract,
                         self.bridge,
                         self.blockchain,
-                        f"Finished processing logs and transactions. Time taken: {end_time - start_time} seconds.",
+                        (
+                            f"Finished processing logs and transactions. Time taken: "
+                            f"{end_time - start_time} seconds.",
+                        ),
                     ),
                     CliColor.SUCCESS,
                 )

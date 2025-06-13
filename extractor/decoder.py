@@ -11,8 +11,13 @@ from web3.contract import Contract
 
 from config.constants import Bridge
 from extractor.base_decoder import BaseDecoder
-from utils.utils import (CustomException, convert_bin_to_hex, load_abi,
-                         load_bridge_config, load_module)
+from utils.utils import (
+    CustomException,
+    convert_bin_to_hex,
+    load_abi,
+    load_bridge_config,
+    load_module,
+)
 
 
 class BridgeDecoder:
@@ -36,9 +41,7 @@ class BridgeDecoder:
             for object in blockchains_config["blockchains"][blockchain]:
                 for contract_addr in object["contracts"]:
                     abi_filename = object["abi"]
-                    abi = load_abi(
-                        os.path.dirname(__file__), bridge, blockchain, abi_filename
-                    )
+                    abi = load_abi(os.path.dirname(__file__), bridge, blockchain, abi_filename)
                     self.contracts_abi[(contract_addr, blockchain)] = abi
 
                     self.register_contract(
@@ -61,8 +64,7 @@ class BridgeDecoder:
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME, func_name, f"Bridge {bridge_name} not supported"
-            )
-
+            ) from e
 
     def register_contract(self, contract_addr: str, blockchain: str, contract_abi: str):
         func_name = "register_contract"
@@ -73,9 +75,7 @@ class BridgeDecoder:
             self.contracts[(contract_addr, blockchain)] = contract
             self.contracts_abi[(contract_addr, blockchain)] = contract_abi
 
-            self.event_abis[contract] = [
-                abi for abi in contract.abi if abi["type"] == "event"
-            ]
+            self.event_abis[contract] = [abi for abi in contract.abi if abi["type"] == "event"]
             self.sign_abis[contract] = {
                 event_abi_to_log_topic(abi): abi for abi in self.event_abis[contract]
             }
@@ -84,7 +84,7 @@ class BridgeDecoder:
                 self.CLASS_NAME,
                 func_name,
                 f"Error registering contract {contract_addr}: {e}",
-            )
+            ) from e
 
     def decode_log(self, contract: Contract, result: Dict[str, Any]):
         """
@@ -114,7 +114,6 @@ class BridgeDecoder:
         else:
             return data
 
-
     def decode_event_input(
         self, contract: Contract, event_data: Union[HexStr, str]
     ) -> Dict[str, Any]:
@@ -139,20 +138,18 @@ class BridgeDecoder:
                 self.CLASS_NAME,
                 func_name,
                 f"Error decoding event input in contract: {contract}; and data: {event_data}; {e}",
-            )
+            ) from e
 
-    def _get_event_abi_by_selector(
-        self, contract: Contract, selector: HexBytes
-    ) -> Dict[str, Any]:
+    def _get_event_abi_by_selector(self, contract: Contract, selector: HexBytes) -> Dict[str, Any]:
         func_name = "_get_event_abi_by_selector"
         try:
             return self.sign_abis[contract][selector]
-        except KeyError:
+        except KeyError as e:
             raise CustomException(
                 self.CLASS_NAME,
                 func_name,
                 f"Event with selector {selector.hex()} is not presented in contract ABI.",
-            )
+            ) from e
 
     def decode(self, contract_addr: str, blockchain: str, log_data: dict) -> dict:
         if (contract_addr, blockchain) not in self.contracts.keys():
@@ -167,21 +164,25 @@ class BridgeDecoder:
 
     def get_abi_input_types_custom(self, abi_element, selector):
         """
-        Extracts and orders the input names and types from an ABI element, ensuring that indexed and non-indexed
-        inputs are separated and ordered correctly -- i.e., consistent with the data received in decode_log.
+        Extracts and orders the input names and types from an ABI element, ensuring that indexed
+        and non-indexed inputs are separated and ordered correctly -- i.e., consistent with the
+        data received in decode_log.
 
-        This function is created instead of using the default `get_abi_input_names` and `get_abi_input_types`
-        in `eth_utils` because they simply extract the names and types in the order that appears in the ABI,
-        which then clashes with the separation of the topics with the general data. Therefore, we need to ensure
-        those are in the same order to have a successful decoding of all fields.
+        This function is created instead of using the default `get_abi_input_names` and
+        `get_abi_input_types` in `eth_utils` because they simply extract the names and types in
+        the order that appears in the ABI, which then clashes with the separation of the topics
+        with the general data. Therefore, we need to ensure those are in the same order to have
+        a successful decoding of all fields.
 
         Args:
             abi_element (dict): The ABI element containing input definitions.
 
         Returns:
             tuple: A tuple containing two lists:
-                - ordered_input_names (list): The ordered (by being indexed or not) list of input names.
-                - ordered_input_types (list): The ordered (by being indexed or not) list of input types.
+            - ordered_input_names (list): The ordered (by being indexed or not) list of input
+              names.
+            - ordered_input_types (list): The ordered (by being indexed or not) list of input
+              types.
         """
 
         if self.ordered_input_types_and_names.get(selector):
@@ -208,7 +209,9 @@ class BridgeDecoder:
                     for component in input["components"]:
                         ordered_input_types.append(component["internalType"])
             else:
-                ordered_input_types.append(input["internalType"] if "internalType" in input else input["type"])
+                ordered_input_types.append(
+                    input["internalType"] if "internalType" in input else input["type"]
+                )
 
         ordered_input_names = []
         for input in ordered_inputs:

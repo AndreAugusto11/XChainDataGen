@@ -17,7 +17,7 @@ BRIDGE_CONFIG = {
                     "0x362A221C3cfd7F992DFE221687323F0BA9BA8187",  # EVM2EVMOnRamp scroll
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -35,9 +35,9 @@ BRIDGE_CONFIG = {
                     "0x26a10137A54F4Ea01D20758Ac5AdBf9326340Fc3",  # EVM2EVMOffRamp scroll
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "arbitrum": [
             {
@@ -52,7 +52,7 @@ BRIDGE_CONFIG = {
                     "0xCeAB512ed28727EeAB94698281F38A2c04b0ce78",  # EVM2EVMOnRamp linea
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -67,9 +67,9 @@ BRIDGE_CONFIG = {
                     "0xCb1DBBb4Be5aEc889C65ff34882f1eAb2Cd5785B",  # EVM2EVMOffRamp linea
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "avalanche": [
             {
@@ -84,7 +84,7 @@ BRIDGE_CONFIG = {
                     "0xc432b86153Eb64D46ecea00591EE7CBc27538c4b",  # EVM2EVMOnRamp linea
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -99,9 +99,9 @@ BRIDGE_CONFIG = {
                     "0x6A3CEf8e5CA7135C574f69d0b58dd0ac9DB2D892",  # EVM2EVMOffRamp linea
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "polygon": [
             {
@@ -115,7 +115,7 @@ BRIDGE_CONFIG = {
                     "0xD26A4E0c664E72e3c29E634867191cB1cb9AF570",  # EVM2EVMOnRamp base
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -129,9 +129,9 @@ BRIDGE_CONFIG = {
                     "0xF4a9Dbb7f3FBa02e3a244B464e459C32B63857F1",  # EVM2EVMOffRamp base
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "optimism": [
             {
@@ -145,7 +145,7 @@ BRIDGE_CONFIG = {
                     "0xfE11cfC957cCa331192EAC60040b442303CcA0a9",  # EVM2EVMOnRamp base
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -159,9 +159,9 @@ BRIDGE_CONFIG = {
                     "0x519ee6B83f57df95486aeA6E26819cb7b4B8ee99",  # EVM2EVMOffRamp base
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "bnb": [
             {
@@ -176,7 +176,7 @@ BRIDGE_CONFIG = {
                     "0x86768B77C971524D5042631749A59527E8a9604d",  # EVM2EVMOnRamp linea
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -191,9 +191,9 @@ BRIDGE_CONFIG = {
                     "0x0c42a007BF89DC2CAfAb3fbd2eC1C1cA5BFe7d7C",  # EVM2EVMOffRamp linea
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "base": [
             {
@@ -208,7 +208,7 @@ BRIDGE_CONFIG = {
                     "0xB1ddDDe9C1e88DF7751f8f2cf18569B13C8AF670",  # EVM2EVMOnRamp linea
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -223,9 +223,9 @@ BRIDGE_CONFIG = {
                     "0x335581943Ef47030e52E4Fe921d4b72d15a20aB3",  # EVM2EVMOffRamp linea
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "gnosis": [
             {
@@ -234,7 +234,7 @@ BRIDGE_CONFIG = {
                     "0x014ABcfDbCe9F67d0Df34574664a6C0A241Ec03A",  # EVM2EVMOnRamp ethereum
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -243,9 +243,9 @@ BRIDGE_CONFIG = {
                     "0x658d9ae41A9c291De423d3B4B6C064f6dD0e7Ed2",  # EVM2EVMOffRamp ethereum
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "ronin": [
             {
@@ -254,7 +254,7 @@ BRIDGE_CONFIG = {
                     "0x02b60267bceeaFDC45005e0Fa0dd783eFeBc9F1b",  # EVM2EVMOnRamp ethereum
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -263,9 +263,9 @@ BRIDGE_CONFIG = {
                     "0x320A10449556388503Fd71D74A16AB52e0BD1dEb",  # EVM2EVMOffRamp ethereum
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "linea": [
             {
@@ -279,7 +279,7 @@ BRIDGE_CONFIG = {
                     "0x30ebb71dAa827bEAE71EE325A77Ca47dAED7Ec9B",  # EVM2EVMOnRamp scroll
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -293,9 +293,9 @@ BRIDGE_CONFIG = {
                     "0xa3Ea5eB15711041fd28950438b5a682392b54e6C",  # EVM2EVMOffRamp scroll
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
+            },
         ],
         "scroll": [
             {
@@ -305,7 +305,7 @@ BRIDGE_CONFIG = {
                     "0x05d472b114D57E6035089A58Fa997A7940D29a23",  # EVM2EVMOnRamp linea
                 ],
                 "topics": [
-                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd", # CCIPSendRequested
+                    "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd",  # CCIPSendRequested
                 ],
             },
             {
@@ -315,9 +315,9 @@ BRIDGE_CONFIG = {
                     "0x5834e1C639418A4973391126576f550A6996836a",  # EVM2EVMOffRamp linea
                 ],
                 "topics": [
-                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65", # ExecutionStateChanged
+                    "0xd4f851956a5d67c3997d1c9205045fef79bae2947fdee7e9e2641abc7391ef65",  # ExecutionStateChanged
                 ],
-            }
-        ]
+            },
+        ],
     }
 }

@@ -91,6 +91,6 @@ BRIDGE_CONFIG = {
                     "0xf8bd640004bcec1b89657020f561d0b070cbdf662d0b158db9dccb0a8301bfab",  # ExecutedRelayerRefundRoot
                 ],
             }
-        ]
+        ],
     }
 }

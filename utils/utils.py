@@ -9,15 +9,14 @@ from enum import Enum
 import requests
 from hexbytes import HexBytes
 
-from config.constants import (BLOCKCHAIN_IDS,
-                              TOKEN_PRICING_SUPPORTED_BLOCKCHAINS, Bridge)
+from config.constants import BLOCKCHAIN_IDS, TOKEN_PRICING_SUPPORTED_BLOCKCHAINS, Bridge
 
 
 def convert_blockchain_into_alchemy_id(blockchain: str) -> str:
     try:
         return TOKEN_PRICING_SUPPORTED_BLOCKCHAINS[blockchain]
-    except KeyError:
-        raise ValueError(f"{blockchain} is not a supported blockchain.")
+    except KeyError as e:
+        raise ValueError(f"{blockchain} is not a supported blockchain.") from e
 
 
 def load_alchemy_api_key() -> str:
@@ -32,10 +31,10 @@ def get_block_by_timestamp(timestamp: int, blockchain: str) -> int:
 
     url = f"https://api.findblock.xyz/v1/chain/{chain_id}/block/before/{timestamp}"
     response = requests.get(url)
-    
+
     if response.status_code == 200:
         data = response.json()
-        return data['number']
+        return data["number"]
     else:
         raise Exception(f"Error fetching {blockchain} block with timestamp {timestamp}.")
 
@@ -55,10 +54,8 @@ def get_blockchain_native_token_symbol(blockchain: str) -> str:
 def get_enum_instance(enum_class: Enum, value: str):
     try:
         return enum_class(value.lower())
-    except ValueError:
-        raise ValueError(
-            f"{value} is not a valid member of the {enum_class.__name__} Enum."
-        )
+    except ValueError as e:
+        raise ValueError(f"{value} is not a valid member of the {enum_class.__name__} Enum.") from e
 
 
 def trim0x(hex_string: str) -> str:
@@ -73,10 +70,10 @@ def unpad_address(padded_address) -> str:
     """
     Extracts the original Ethereum address from a 32-byte padded value.
     Assumes that the address occupies the rightmost 20 bytes.
-    
+
     Args:
         padded_address (bytes): A 32-byte padded address.
-    
+
     Returns:
         str: The original Ethereum address as a hex string.
     """
@@ -89,7 +86,7 @@ def unpad_address(padded_address) -> str:
         hex_str = padded_address[2:] if padded_address.startswith("0x") else padded_address
     else:
         raise TypeError("padded_address must be either bytes or a hex string")
-    
+
     # Extract the last 40 hex characters (20 bytes) which represent the address
     original_address = hex_str[-40:]
     return "0x" + original_address
@@ -101,7 +98,7 @@ def log_error(bridge: Bridge, message: str):
 
     :param message: The error message to be logged.
     """
-    log_file = './error_log.log'
+    log_file = "./error_log.log"
 
     log_to_file(message, log_file)
     log_to_cli(build_log_message_generator(bridge, f"Error written to {log_file}"), CliColor.ERROR)
@@ -131,9 +128,7 @@ def log_to_file(message: str, log_file: str):
         # Fallback in case the logger fails
         with open(log_file, "a") as fallback_log:
             fallback_log.write(f"{datetime.now()} - ERROR - Failed to log error: {e}\n")
-            fallback_log.write(
-                f"{datetime.now()} - ERROR - Original message: {message}\n"
-            )
+            fallback_log.write(f"{datetime.now()} - ERROR - Original message: {message}\n")
 
 
 class CliColor(Enum):
@@ -154,7 +149,9 @@ def build_log_message(
     blockchain: str,
     message: str = "",
 ):
-    message = f"Block range {start_block}-{end_block} in {blockchain} in contract {contract} -- {message}"
+    message = (
+        f"Block range {start_block}-{end_block} in {blockchain} in contract {contract} -- {message}"
+    )
     message = f"{datetime.now()} - INFO - {bridge.value} - {message}"
 
     return message
@@ -181,7 +178,7 @@ def load_module(module_name: str):
 
 def load_bridge_config(bridge_name: str) -> dict:
     module = load_module(f"extractor.{bridge_name}.constants")
-    return getattr(module, "BRIDGE_CONFIG")
+    return module.BRIDGE_CONFIG
 
 
 def load_abi(root_dir: str, bridge: Bridge, blockchain, contract_addr: str):

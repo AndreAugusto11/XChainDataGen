@@ -1,4 +1,3 @@
-
 from web3.contract import Contract
 
 from extractor.base_decoder import BaseDecoder
@@ -15,10 +14,8 @@ class CctpDecoder(BaseDecoder):
         func_name = "decode_event"
 
         if log["topics"][0] == "0x58200b4c34ae05ee816d710053fff3fb75af4395915d3d2a771b24aa10e3cc5d":
-            return contract.events.MessageReceived().process_log(log)['args']
-        
+            return contract.events.MessageReceived().process_log(log)["args"]
+
         raise CustomException(
-            self.CLASS_NAME,
-            func_name,
-            f"Unknown event topic: {log['topics'][0]}"
+            self.CLASS_NAME, func_name, f"Unknown event topic: {log['topics'][0]}"
         )

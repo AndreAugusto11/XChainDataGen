@@ -72,8 +72,8 @@ class BaseRepository:
         with self.get_session() as session:
             session.execute(query)
 
-class CrossChainRepository(BaseRepository):
 
+class CrossChainRepository(BaseRepository):
     @abstractmethod
     def populate_table(self, query) -> None:
         pass
@@ -85,7 +85,7 @@ class CrossChainRepository(BaseRepository):
     @abstractmethod
     def get_min_timestamp(self) -> None:
         pass
-    
+
     @abstractmethod
     def get_max_timestamp(self) -> None:
         pass

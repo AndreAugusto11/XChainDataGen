@@ -5,11 +5,27 @@ from sqlalchemy import text
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.common.repository import *
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from repository.debridge.repository import *
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from repository.debridge.repository import (
+    DeBridgeBlockchainTransactionRepository,
+    DeBridgeClaimedUnlockRepository,
+    DeBridgeCreatedOrderRepository,
+    DeBridgeCrossChainTransactionsRepository,
+    DeBridgeFulfilledOrderRepository,
+    DeBridgeSentOrderUnlockRepository,
+)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class DebridgeGenerator(BaseGenerator):
@@ -43,21 +59,79 @@ class DebridgeGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             ## POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
             cctxs = self.debridge_cross_chain_transactions.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
             self.fill_null_address_tokens()
 
-            # a lot of token addresses in Gnosis are not being recognized by alchemy, so we fetch from both the src and dst blockchains, to make sure we use the Ethereum contracts
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "input_amount", "src_blockchain", "src_contract_address", "src_timestamp", "input_amount_usd")
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "output_amount", "dst_blockchain", "dst_contract_address", "dst_timestamp", "output_amount_usd")
+            # a lot of token addresses in Gnosis are not being recognized by alchemy, so we fetch
+            # from both the src and dst blockchains, to make sure we use the Ethereum contracts
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "input_amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "input_amount_usd",
+            )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "output_amount",
+                "dst_blockchain",
+                "dst_contract_address",
+                "dst_timestamp",
+                "output_amount_usd",
+            )
 
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee",  "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee",  "dst_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "native_fix_fee",  "native_fix_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.debridge_cross_chain_transactions, "debridge_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "percent_fee",  "percent_fee_usd")
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "native_fix_fee",
+                "native_fix_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.debridge_cross_chain_transactions,
+                "debridge_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "percent_fee",
+                "percent_fee_usd",
+            )
 
         except Exception as e:
             exception = CustomException(
@@ -67,19 +141,16 @@ class DebridgeGenerator(BaseGenerator):
             )
             log_error(self.bridge, exception)
 
-
     def match_cctxs(self):
         func_name = "match_cctxs"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Matching deBridge token transfers...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Matching deBridge token transfers..."))
 
         self.debridge_cross_chain_transactions.empty_table()
 
         query = text(
-        """
+            """
             INSERT INTO debridge_cross_chain_transactions (
                 src_blockchain,
                 src_transaction_hash,
@@ -141,7 +212,7 @@ class DebridgeGenerator(BaseGenerator):
             JOIN debridge_blockchain_transaction src_tx ON src_tx.transaction_hash = deposit.transaction_hash
             JOIN debridge_fulfilled_order fill ON fill.order_id = deposit.order_id
             JOIN debridge_blockchain_transaction dst_tx ON dst_tx.transaction_hash = fill.transaction_hash;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -153,7 +224,10 @@ class DebridgeGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}",
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -162,20 +236,20 @@ class DebridgeGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-        
+            ) from e
+
     def fill_null_address_tokens(self):
         """
-        DeBridge uses the null address (0x0000000000000000000000000000000000000000) when transferring the native tokens in give_token_address and take_token_address.
-        We need to match them in the database to the native token address of the src and dst blockchains.
+        DeBridge uses the null address (0x0000000000000000000000000000000000000000) when
+        transferringthe native tokens in give_token_address and take_token_address.
+        We need to match them in the database to the native token address of the src and
+        dst blockchains.
         """
 
         func_name = "fill_null_address_tokens"
 
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Filling null address tokens...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Filling null address tokens..."))
 
         try:
             query = text(
@@ -203,21 +277,18 @@ class DebridgeGenerator(BaseGenerator):
                 ),
                 CliColor.SUCCESS,
             )
-        except Exception as e:  
+        except Exception as e:
             exception = CustomException(
                 self.CLASS_NAME,
                 func_name,
                 f"Error filling null address tokens. Error: {e}",
             )
             log_error(self.bridge, exception)
-            raise exception
-
+            raise exception from e
 
     def populate_token_info_tables(self, cctxs, start_ts, end_ts):
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Fetching token prices...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Fetching token prices..."))
 
         for cctx in cctxs:
             self.price_generator.populate_token_info(
@@ -231,7 +302,7 @@ class DebridgeGenerator(BaseGenerator):
                 start_ts,
                 end_ts,
             )
-        
+
         end_time = time.time()
         log_to_cli(
             build_log_message_generator(

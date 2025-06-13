@@ -5,11 +5,25 @@ from sqlalchemy import text
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
-from repository.ccip.repository import *
-from repository.common.repository import *
+from repository.ccip.repository import (
+    CCIPBlockchainTransactionRepository,
+    CCIPCrossChainTransactionsRepository,
+    CCIPExecutionStateChangedRepository,
+    CCIPSendRequestedRepository,
+)
+from repository.common.repository import (
+    NativeTokenRepository,
+    TokenMetadataRepository,
+    TokenPriceRepository,
+)
 from repository.database import DBSession
-from utils.utils import (CliColor, CustomException,
-                         build_log_message_generator, log_error, log_to_cli)
+from utils.utils import (
+    CliColor,
+    CustomException,
+    build_log_message_generator,
+    log_error,
+    log_to_cli,
+)
 
 
 class CcipGenerator(BaseGenerator):
@@ -40,15 +54,56 @@ class CcipGenerator(BaseGenerator):
             end_ts = int(self.transactions_repo.get_max_timestamp()) + 86400
 
             # POPULATE TOKEN TABLES WITH NATIVE TOKEN INFO
-            PriceGenerator.populate_native_tokens(self.bridge, self.native_token_repo, self.token_metadata_repo, self.token_price_repo, start_ts, end_ts)
+            PriceGenerator.populate_native_tokens(
+                self.bridge,
+                self.native_token_repo,
+                self.token_metadata_repo,
+                self.token_price_repo,
+                start_ts,
+                end_ts,
+            )
 
             cctxs = self.cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_transactions_repo, "ccip_cross_chain_transactions", "amount", "src_blockchain", "src_contract_address", "src_timestamp", "amount_usd")
-            PriceGenerator.calculate_cctx_usd_values(self.bridge, self.cross_chain_transactions_repo, "ccip_cross_chain_transactions", "fee_token_amount", "src_blockchain", "fee_token", "src_timestamp", "fee_token_amount_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_transactions_repo, "ccip_cross_chain_transactions", "src_timestamp", "src_blockchain", "src_fee", "src_fee_usd")
-            PriceGenerator.calculate_cctx_native_usd_values(self.bridge, self.cross_chain_transactions_repo, "ccip_cross_chain_transactions", "dst_timestamp", "dst_blockchain", "dst_fee", "dst_fee_usd")
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ccip_cross_chain_transactions",
+                "amount",
+                "src_blockchain",
+                "src_contract_address",
+                "src_timestamp",
+                "amount_usd",
+            )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ccip_cross_chain_transactions",
+                "fee_token_amount",
+                "src_blockchain",
+                "fee_token",
+                "src_timestamp",
+                "fee_token_amount_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ccip_cross_chain_transactions",
+                "src_timestamp",
+                "src_blockchain",
+                "src_fee",
+                "src_fee_usd",
+            )
+            PriceGenerator.calculate_cctx_native_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "ccip_cross_chain_transactions",
+                "dst_timestamp",
+                "dst_blockchain",
+                "dst_fee",
+                "dst_fee_usd",
+            )
         except Exception as e:
             exception = CustomException(
                 self.CLASS_NAME,
@@ -56,7 +111,6 @@ class CcipGenerator(BaseGenerator):
                 f"Error processing cross chain transactions. Error: {e}",
             )
             log_error(self.bridge, exception)
-
 
     def match_cctxs(self):
         func_name = "match_cctxs"
@@ -124,7 +178,7 @@ class CcipGenerator(BaseGenerator):
             JOIN ccip_execution_state_changed fill ON fill.message_id = deposit.message_id AND fill.sequence_number = deposit.sequence_number
             JOIN ccip_blockchain_transactions dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
             WHERE deposit.input_token is not NULL;
-        """
+        """  # noqa: E501
         )
 
         try:
@@ -136,7 +190,10 @@ class CcipGenerator(BaseGenerator):
             log_to_cli(
                 build_log_message_generator(
                     self.bridge,
-                    f"Token transfers matched in {end_time - start_time} seconds. Total records inserted: {size}",
+                    (
+                        f"Token transfers matched in {end_time - start_time} seconds. "
+                        f"Total records inserted: {size}"
+                    ),
                 ),
                 CliColor.SUCCESS,
             )
@@ -145,14 +202,11 @@ class CcipGenerator(BaseGenerator):
                 self.CLASS_NAME,
                 func_name,
                 f"Error processing token transfers. Error: {e}",
-            )
-
+            ) from e
 
     def populate_token_info_tables(self, cctxs, start_ts, end_ts):
         start_time = time.time()
-        log_to_cli(
-            build_log_message_generator(self.bridge, "Fetching token prices...")
-        )
+        log_to_cli(build_log_message_generator(self.bridge, "Fetching token prices..."))
 
         for cctx in cctxs:
             self.price_generator.populate_token_info(
@@ -166,7 +220,7 @@ class CcipGenerator(BaseGenerator):
                 start_ts,
                 end_ts,
             )
-        
+
         end_time = time.time()
         log_to_cli(
             build_log_message_generator(

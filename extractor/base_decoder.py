@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 
 class BaseDecoder(ABC):
-
     @abstractmethod
     def decode_event(
         self,

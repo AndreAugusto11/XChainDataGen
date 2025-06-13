@@ -1,8 +1,15 @@
-from sqlalchemy import Index, func
+from sqlalchemy import func
 
 from repository.base import BaseRepository
 
-from .models import *
+from .models import (
+    DeBridgeBlockchainTransaction,
+    DeBridgeClaimedUnlock,
+    DeBridgeCreatedOrder,
+    DeBridgeCrossChainTransactions,
+    DeBridgeFulfilledOrder,
+    DeBridgeSentOrderUnlock,
+)
 
 
 class DeBridgeBlockchainTransactionRepository(BaseRepository):
@@ -20,7 +27,7 @@ class DeBridgeBlockchainTransactionRepository(BaseRepository):
     def get_max_timestamp(self):
         with self.get_session() as session:
             return session.query(func.max(DeBridgeBlockchainTransaction.timestamp)).scalar()
-    
+
 
 class DeBridgeCreatedOrderRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -28,9 +35,12 @@ class DeBridgeCreatedOrderRepository(BaseRepository):
 
     def event_exists(self, order_id: str):
         with self.get_session() as session:
-            return session.query(DeBridgeCreatedOrder).filter(
-                DeBridgeCreatedOrder.order_id == order_id
-            ).first()
+            return (
+                session.query(DeBridgeCreatedOrder)
+                .filter(DeBridgeCreatedOrder.order_id == order_id)
+                .first()
+            )
+
 
 class DeBridgeFulfilledOrderRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -38,9 +48,12 @@ class DeBridgeFulfilledOrderRepository(BaseRepository):
 
     def event_exists(self, order_id: str):
         with self.get_session() as session:
-            return session.query(DeBridgeFulfilledOrder).filter(
-                DeBridgeFulfilledOrder.order_id == order_id
-            ).first()
+            return (
+                session.query(DeBridgeFulfilledOrder)
+                .filter(DeBridgeFulfilledOrder.order_id == order_id)
+                .first()
+            )
+
 
 class DeBridgeClaimedUnlockRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -48,9 +61,12 @@ class DeBridgeClaimedUnlockRepository(BaseRepository):
 
     def event_exists(self, order_id: str):
         with self.get_session() as session:
-            return session.query(DeBridgeClaimedUnlock).filter(
-                DeBridgeClaimedUnlock.order_id == order_id
-            ).first()
+            return (
+                session.query(DeBridgeClaimedUnlock)
+                .filter(DeBridgeClaimedUnlock.order_id == order_id)
+                .first()
+            )
+
 
 class DeBridgeSentOrderUnlockRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -58,11 +74,15 @@ class DeBridgeSentOrderUnlockRepository(BaseRepository):
 
     def event_exists(self, order_id: str):
         with self.get_session() as session:
-            return session.query(DeBridgeSentOrderUnlock).filter(
-                DeBridgeSentOrderUnlock.order_id == order_id
-            ).first()
+            return (
+                session.query(DeBridgeSentOrderUnlock)
+                .filter(DeBridgeSentOrderUnlock.order_id == order_id)
+                .first()
+            )
+
 
 ########## Processed Data ##########
+
 
 class DeBridgeCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
@@ -87,25 +107,32 @@ class DeBridgeCrossChainTransactionsRepository(BaseRepository):
 
     def get_by_src_tx_hash(self, src_tx_hash: str):
         with self.get_session() as session:
-            return session.query(DeBridgeCrossChainTransactions).filter(
-                DeBridgeCrossChainTransactions.src_transaction_hash == src_tx_hash
-            ).first()
+            return (
+                session.query(DeBridgeCrossChainTransactions)
+                .filter(DeBridgeCrossChainTransactions.src_transaction_hash == src_tx_hash)
+                .first()
+            )
 
     def get_unique_src_dst_contract_pairs(self):
         with self.get_session() as session:
-            return session.query(
-                DeBridgeCrossChainTransactions.src_blockchain,
-                DeBridgeCrossChainTransactions.src_contract_address,
-                DeBridgeCrossChainTransactions.dst_blockchain,
-                DeBridgeCrossChainTransactions.dst_contract_address,
-            ).group_by(
-                DeBridgeCrossChainTransactions.src_blockchain,
-                DeBridgeCrossChainTransactions.src_contract_address,
-                DeBridgeCrossChainTransactions.dst_blockchain,
-                DeBridgeCrossChainTransactions.dst_contract_address
-            ).all()
-    
+            return (
+                session.query(
+                    DeBridgeCrossChainTransactions.src_blockchain,
+                    DeBridgeCrossChainTransactions.src_contract_address,
+                    DeBridgeCrossChainTransactions.dst_blockchain,
+                    DeBridgeCrossChainTransactions.dst_contract_address,
+                )
+                .group_by(
+                    DeBridgeCrossChainTransactions.src_blockchain,
+                    DeBridgeCrossChainTransactions.src_contract_address,
+                    DeBridgeCrossChainTransactions.dst_blockchain,
+                    DeBridgeCrossChainTransactions.dst_contract_address,
+                )
+                .all()
+            )
+
     def get_total_amount_usd_transacted(self):
         with self.get_session() as session:
-            return session.query(func.sum(DeBridgeCrossChainTransactions.output_amount_usd)).scalar()
-
+            return session.query(
+                func.sum(DeBridgeCrossChainTransactions.output_amount_usd)
+            ).scalar()

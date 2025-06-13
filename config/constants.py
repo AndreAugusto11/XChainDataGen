@@ -12,6 +12,7 @@ class Bridge(Enum):
     OMNIBRIDGE = "omnibridge"
     DEBRIDGE = "debridge"
 
+
 BLOCKCHAIN_IDS = {
     "8453": {
         "name": "base",
@@ -66,7 +67,7 @@ BLOCKCHAIN_IDS = {
     "2020": {
         "name": "ronin",
         "native_token": "AXS",
-    }
+    },
 }
 
 # the list of blockchains supported by Alchemy to retrieve token
@@ -82,7 +83,7 @@ TOKEN_PRICING_SUPPORTED_BLOCKCHAINS = {
     "arbitrum": "arb",
     "scroll": "scroll",
     "linea": "linea",
-    "gnosis": "gnosis"
+    "gnosis": "gnosis",
 }
 
 

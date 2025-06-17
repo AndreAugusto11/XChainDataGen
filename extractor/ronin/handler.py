@@ -23,18 +23,11 @@ class RoninHandler(BaseHandler):
         self.bridge = Bridge.RONIN
 
     def get_bridge_contracts_and_topics(self, bridge: str, blockchain: List[str]) -> None:
-        """
-        Validates the mapping between the bridge and the blockchains.
-
-        Args:
-            bridge: The bridge to validate.
-            blockchain: The blockchain to validate.
-        """
-
-        if blockchain not in BRIDGE_CONFIG["blockchains"]:
-            raise ValueError(f"Blockchain {blockchain} not supported for bridge {bridge}.")
-
-        return BRIDGE_CONFIG["blockchains"][blockchain]
+        return super().get_bridge_contracts_and_topics(
+            config=BRIDGE_CONFIG,
+            bridge=bridge,
+            blockchain=blockchain,
+        )
 
     def bind_db_to_repos(self):
         self.blockchain_transaction_repo = RoninBlockchainTransactionRepository(DBSession)

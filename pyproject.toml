@@ -1,4 +1,3 @@
-skip = [".xchaindata"]
 
 [tool.ruff]
 line-length = 100
@@ -7,8 +6,6 @@ exclude = [
     "**/constants.py",
     "**/*.ipynb",
 ]
-
-skip = [".xchaindata", ".vscode"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]  # Pyflakes, pycodestyle, isort, bugbear

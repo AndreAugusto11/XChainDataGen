@@ -31,8 +31,20 @@ class BaseHandler(ABC):
         pass
 
     @abstractmethod
-    def get_bridge_contracts_and_topics(self, blockchain: str) -> List[T]:
-        pass
+    def get_bridge_contracts_and_topics(
+        self, config: Dict, bridge: str, blockchain: List[str]
+    ) -> List[T]:
+        """
+        Validates the mapping between the bridge and the blockchains.
+
+        Args:
+            bridge: The bridge to validate.
+            blockchain: The blockchain to validate.
+        """
+        if blockchain not in config["blockchains"]:
+            raise ValueError(f"Blockchain {blockchain} not supported for bridge {bridge}.")
+
+        return config["blockchains"][blockchain]
 
     @abstractmethod
     def bind_db_to_repos(self) -> None:

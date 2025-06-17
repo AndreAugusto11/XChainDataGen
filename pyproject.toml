@@ -1,4 +1,3 @@
-[tool.isort]
 skip = [".xchaindata"]
 
 [tool.ruff]
@@ -9,9 +8,10 @@ exclude = [
     "**/*.ipynb",
 ]
 
+skip = [".xchaindata", ".vscode"]
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]  # Pyflakes, pycodestyle, isort, bugbear
-extend-select = ["I", "B"]
 
 [tool.ruff.format]
 quote-style = "double"

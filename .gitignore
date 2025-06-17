@@ -16,3 +16,5 @@ analysis/data.zip
 analysis/data/
 
 .env
+
+error_log.log

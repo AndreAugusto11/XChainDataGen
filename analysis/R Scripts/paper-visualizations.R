@@ -47,7 +47,7 @@ ggplot(eth_avax_data, aes(
   ),
   color = src_blockchain
 )) +
-  geom_point(size = 0.3, alpha = 0.8) +
+  geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0.1, height = 0.1)) +
   facet_wrap(
     ~bridge,
     scales = "fixed",
@@ -89,11 +89,11 @@ ggplot(eth_avax_data, aes(
     plot.title = element_text(
       face = "bold", size = 15, hjust = 0.5, vjust = -1
     ),
-    plot.margin = unit(c(0, 0.2, 0, 0), "cm"),
+    plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "cm"),
     text = element_text(family = "serif"),
-    axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
-    axis.title.x = element_text(size = 14, face = "bold", vjust = -2),
-    axis.text = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 25, face = "bold", vjust = 1),
+    axis.title.x = element_text(size = 25, face = "bold", vjust = -1),
+    axis.text = element_text(size = 25, face = "bold"),
     axis.line = element_line(color = "black", linewidth = 0.2),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(
@@ -101,16 +101,13 @@ ggplot(eth_avax_data, aes(
     ),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
-    legend.title = element_text(face = "bold", size = 12),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(face = "bold", size = 25),
+    legend.text = element_text(size = 25),
     legend.position = "bottom",
     strip.background = element_blank(),
-    strip.text = element_text(size = 10, face = "bold", color = "black"),
+    strip.text = element_text(size = 25, face = "bold", color = "black"),
     panel.border = element_blank(),
     panel.background = element_rect(fill = "grey99", color = NA),
-    legend.justification = c(0, 0),
-    legend.box.just = "left",
-    legend.margin = margin(0, 0, 0, 0)
   )
 
 
@@ -258,14 +255,14 @@ symlog_trans <- function(base = 10, thr = 1, scale = 1){
   trans_new(paste("symlog", thr, base, scale, sep = "-"), trans, inv, breaks)
 }
 
-ggplot(base_arb_data_sample, aes(
+ggplot(base_arb_data, aes(
   x = latency,
   y = ifelse(bridge == "across", output_amount_usd,
              ifelse(bridge == "stargate_bus", amount_received_ld_usd, amount_usd)
   ),
   color = src_blockchain
 )) +
-  geom_point(size = 0.2, alpha = 0.8) +
+  geom_point(size = 0.5, alpha = 0.2) +
   facet_wrap(
     ~bridge,
     scales = "fixed",
@@ -281,7 +278,7 @@ ggplot(base_arb_data_sample, aes(
     limits = c(-10^1, 10^6),
     trans = symlog_trans(base = 10, thr = 1),
     breaks = c(-10, -1, 0, 1, 10, 100, 1000, 10000, 100000, 1000000),
-    labels = c("-10^1", "-1", "0", "1", "10^1", "10^2", "10^3", "10^4", "10^5", "10^6")
+    labels = c(-10, -1, 0, 1, 10, 100, "1,000", "10,000", "100,000", "1,000,000")
   ) +
   scale_y_log10(
     limits = c(10^-4, 10^6),
@@ -301,31 +298,29 @@ ggplot(base_arb_data_sample, aes(
   theme_linedraw(base_family = "Times New Roman") +
   theme(
     plot.title = element_text(
-      face = "bold", size = 15, hjust = 0.5, vjust = -1
+      face = "bold", size = 25, hjust = 0.5, vjust = -1
     ),
     plot.margin = unit(c(0, 0.2, 0, 0), "cm"),
     text = element_text(family = "serif"),
-    axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
-    axis.title.x = element_text(size = 14, face = "bold", vjust = -2),
-    axis.line = element_line(color = "black", linewidth = 0.1),
+    axis.title.y = element_text(size = 25, face = "bold", vjust = 1),
+    axis.title.x = element_text(size = 25, face = "bold", vjust = -2),
+    axis.line = element_line(color = "black", linewidth = 0.3),
+    axis.text = element_text(size = 25, face = "bold"),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(
-      color = "grey80", linewidth = 0.1, linetype = 2
+      color = "grey80", linewidth = 0.3, linetype = 2
     ),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
-    legend.title = element_text(face = "bold", size = 12),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(face = "bold", size = 25),
+    legend.text = element_text(size = 25),
     legend.position = "bottom",
     strip.background = element_blank(),
-    strip.text = element_text(size = 10, face = "bold", color = "black"),
+    strip.text = element_text(size = 25, face = "bold", color = "black"),
     panel.border = element_blank(),
     panel.background = element_rect(fill = "grey99", color = NA),
-    legend.justification = c(0, 0),
-    legend.box.just = "left",
     legend.margin = margin(0, 0, 0, 0)
   )
-
 
 ################################################################################
 #                          Base <-> Arbitrum (Cost)                            #
@@ -414,7 +409,8 @@ filtered_df_stargate_bus_out_of_scope <- stargate_bus_df %>%
 
 merged_filtered_df_stargate_bus <- rbind(filtered_df_stargate_bus, filtered_df_stargate_bus_2, filtered_df_stargate_bus_3, filtered_df_stargate_bus_out_of_scope)
 
-print_df = rbind(merged_filtered_df_stargate_bus, merged_filtered_df_across)
+#print_df = rbind(merged_filtered_df_stargate_bus, merged_filtered_df_across)
+print_df = rbind(stargate_bus_df, across_df)
 
 custom_labels <- c(
   "stargate_bus" = "Stargate (Bus)",
@@ -436,14 +432,19 @@ ggplot(print_df, aes(
   facet_wrap(
     ~bridge,
     scales = "fixed",
-    ncol = 1,
+    nrow = 1,
     labeller = labeller(bridge = custom_labels)
   ) +
   scale_x_continuous(
     limits = c(-10^0, 10^2),
     trans = symlog_trans(base = 10, thr = 1),
     breaks = c(-10, -1, 0, 1, 10, 100, 1000, 10000),
-    labels = c("-10^1", "-1", "0", "1", "10^1", "10^2", "10^3", "10^4")
+    labels = function(x) {
+      ifelse(x < 1,
+             scales::dollar_format()(x),
+             scales::dollar_format()(x)
+      )
+    }
   ) +
   scale_y_log10(
     limits = c(0.01, 10^6),
@@ -463,24 +464,25 @@ ggplot(print_df, aes(
   theme_linedraw(base_family = "Times New Roman") +
   theme(
     plot.title = element_text(
-      face = "bold", size = 15, hjust = 0.5, vjust = -1
+      face = "bold", size = 16, hjust = 0.5, vjust = -1
     ),
     plot.margin = unit(c(0, 0.2, 0, 0), "cm"),
     text = element_text(family = "serif"),
-    axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
-    axis.title.x = element_text(size = 14, face = "bold", vjust = -2),
+    axis.title.y = element_text(size = 24, face = "bold", vjust = 1),
+    axis.title.x = element_text(size = 24, face = "bold", vjust = -2),
+    axis.text = element_text(size = 20, face = "bold"),
     axis.line = element_line(color = "black", linewidth = 0.1),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(
-      color = "grey80", linewidth = 0.1, linetype = 2
+      color = "grey10", linewidth = 0.1, linetype = 2,
     ),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
-    legend.title = element_text(face = "bold", size = 12),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(face = "bold", size = 24),
+    legend.text = element_text(size = 24),
     legend.position = "bottom",
     strip.background = element_blank(),
-    strip.text = element_text(size = 10, face = "bold", color = "black"),
+    strip.text = element_text(size = 24, face = "bold", color = "black"),
     panel.border = element_blank(),
     panel.background = element_rect(fill = "grey99", color = NA),
   )
@@ -620,7 +622,7 @@ p2 <- ggplot(merged_data, aes(
     legend.text = element_text(size = 12),
   )
 
-grid.arrange(p1, p2, ncol=1)
+grid.arrange(p1, p2, nrow=1)
 
 
 
@@ -691,14 +693,14 @@ ggplot(merged_data, aes(
   theme_linedraw(base_family = "Times New Roman") +
   theme(
     plot.title = element_text(
-      face = "bold", size = 15, hjust = 0.5, vjust = -1
+      face = "bold", size = 25, hjust = 0.5, vjust = -1
     ),
     plot.margin = unit(c(0, 0, 0.5, 0), "cm"),
     text = element_text(family = "serif"),
-    axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
-    axis.title.x = element_text(size = 14, face = "bold", vjust = -1),
-    axis.text = element_text(size = 12, vjust = 1),
-    axis.line = element_line(color = "black", linewidth = 0.1),
+    axis.title.y = element_text(size = 25, face = "bold", vjust = 1),
+    axis.title.x = element_text(size = 25, face = "bold", vjust = -1),
+    axis.text = element_text(size = 25, vjust = 1),
+    axis.line = element_line(color = "black", linewidth = 0.3),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(
       color = "grey80", linewidth = 0.1, linetype = 2
@@ -707,9 +709,9 @@ ggplot(merged_data, aes(
     panel.grid.minor.y = element_blank(),
     panel.border = element_blank(),
     panel.background = element_rect(fill = "grey99", color = NA),
-    legend.title = element_text(face = "bold", size=14, margin = margin(r = 5, b = 10)),
+    legend.title = element_text(face = "bold", size=25, margin = margin(r = 5, b = 10)),
     legend.background = element_rect(fill="white"),
-    legend.text = element_text(size = 12),
+    legend.text = element_text(size = 25),
   )
 
 
@@ -721,15 +723,23 @@ ggplot(merged_data, aes(
 
 ccip_df <- fread("../data/ccip.csv", select = c("src_blockchain", "dst_blockchain", "src_timestamp", "fee_token", "fee_token_amount"))
 
+# Convert src_timestamp to date
+ccip_df$date <- as.POSIXct(ccip_df$src_timestamp, origin = "1970-01-01")
+
+# only want datapoints where date is after 1st November 2024
+ccip_df <- ccip_df %>%
+  filter(date >= as.POSIXct("2024-11-01"))
+
 # Filter the data
-token_fee <- ccip_df %>%
+token_fee_base <- ccip_df %>%
   filter(src_blockchain == 'base' & fee_token == '0x4200000000000000000000000000000000000006' & dst_blockchain != "polygon")
 
-# Convert src_timestamp to date
-token_fee$date <- as.POSIXct(token_fee$src_timestamp, origin = "1970-01-01")
+token_fee_bnb <- ccip_df %>%
+  filter(src_blockchain == 'bnb' & fee_token == '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c' & dst_blockchain != "polygon")
+
 
 # Plot the data
-ggplot(token_fee, aes(x = date, y = fee_token_amount, color = dst_blockchain)) +
+p1 <- ggplot(token_fee_base, aes(x = date, y = fee_token_amount, color = dst_blockchain)) +
   geom_point(size = 1, alpha = 1) +
   scale_color_manual(
     values = c("arbitrum" = "#f67d7d", "avalanche" = "#7b7bff", "bnb" = "#55c855", "ethereum" = "#e2a83d", "linea" = "#c27bee", "optimism" = "#605f5f"),
@@ -738,19 +748,20 @@ ggplot(token_fee, aes(x = date, y = fee_token_amount, color = dst_blockchain)) +
   ) +
   scale_y_log10() +
   labs(
+    title = "a) WETH Transfers from Base",
     x = "Date",
     y = "Protocol Fee Value (Wei)",
   ) +
   theme_linedraw(base_family = "Times New Roman") +
   theme(
     plot.title = element_text(
-      face = "bold", size = 15, hjust = 0.5, vjust = -1
+      face = "bold", size = 20, hjust = 0.5, vjust = -1
     ),
     plot.margin = unit(c(0, 0.2, 0, 0), "cm"),
     text = element_text(family = "serif"),
     axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
     axis.title.x = element_text(size = 14, face = "bold", vjust = 1),
-    axis.text = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 14, face = "bold"),
     axis.line = element_line(color = "black", linewidth = 0.2),
     panel.grid.major.y = element_blank(),
     panel.grid.major.x = element_line(
@@ -758,11 +769,50 @@ ggplot(token_fee, aes(x = date, y = fee_token_amount, color = dst_blockchain)) +
     ),
     panel.grid.minor.x = element_blank(),
     panel.grid.minor.y = element_blank(),
-    legend.title = element_text(face = "bold", size = 12),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(face = "bold", size = 14),
+    legend.text = element_text(size = 14),
     strip.background = element_blank(),
-    strip.text = element_text(size = 10, face = "bold", color = "black"),
+    strip.text = element_text(size = 14, face = "bold", color = "black"),
     panel.border = element_blank(),
     panel.background = element_rect(fill = "grey99", color = NA),
   )
 
+p2 <- ggplot(token_fee_bnb, aes(x = date, y = fee_token_amount, color = dst_blockchain)) +
+  geom_point(size = 1, alpha = 1) +
+  scale_color_manual(
+    values = c("arbitrum" = "#f67d7d", "avalanche" = "#7b7bff", "base" = "#55c855", "ethereum" = "#e2a83d", "linea" = "#c27bee", "optimism" = "#605f5f"),
+    name = "Destination Blockchain",
+    labels = c('Arbitrum', 'Avalanche', 'Base', 'Ethereum', 'Linea', 'Optimism')
+  ) +
+  scale_y_log10() +
+  labs(
+    title = "b) WBNB Transfers from BNB Chain",
+    x = "Date",
+    y = "Protocol Fee Value (Wei)",
+  ) +
+  theme_linedraw(base_family = "Times New Roman") +
+  theme(
+    plot.title = element_text(
+      face = "bold", size = 20, hjust = 0.5, vjust = -1
+    ),
+    plot.margin = unit(c(0, 0.2, 0, 0), "cm"),
+    text = element_text(family = "serif"),
+    axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
+    axis.title.x = element_text(size = 14, face = "bold", vjust = 1),
+    axis.text = element_text(size = 14, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.2),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(
+      color = "grey80", linewidth = 0.1, linetype = 2
+    ),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    legend.title = element_text(face = "bold", size = 14),
+    legend.text = element_text(size = 14),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 14, face = "bold", color = "black"),
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "grey99", color = NA),
+  )
+
+grid.arrange(p1, p2, nrow=1)

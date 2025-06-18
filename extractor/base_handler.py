@@ -101,17 +101,17 @@ class BaseHandler(ABC):
                 flattened[key] = value
         return flattened
 
-    def convert_id_to_blockchain_name(self, id: str) -> str | None:
+    def convert_id_to_blockchain_name(self, id: str, blockchain_ids=BLOCKCHAIN_IDS) -> str | None:
         func_name = "convert_id_to_blockchain_name"
 
         id = str(id)
 
-        if id in BLOCKCHAIN_IDS:
-            blockchain_name = BLOCKCHAIN_IDS[id]["name"]
+        if id in blockchain_ids:
+            blockchain_name = blockchain_ids[id]["name"]
             # If the blockchain name is not in the list of blockchains specified by the user,
             # return None
             if self.counterPartyBlockchainsMap.get(blockchain_name):
-                return BLOCKCHAIN_IDS[id]["name"]
+                return blockchain_ids[id]["name"]
 
         # If the blockchain ID is not found, log an error and return None
         CustomException(self.CLASS_NAME, func_name, f"Blockchain with ID {id} not included")

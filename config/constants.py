@@ -11,6 +11,7 @@ class Bridge(Enum):
     RONIN = "ronin"
     OMNIBRIDGE = "omnibridge"
     DEBRIDGE = "debridge"
+    MAYAN = "mayan"
 
 
 BLOCKCHAIN_IDS = {

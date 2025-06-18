@@ -182,7 +182,7 @@ class CcipGenerator(BaseGenerator):
         )
 
         try:
-            self.cross_chain_transactions_repo.populate_table(query)
+            self.cross_chain_transactions_repo.execute(query)
 
             size = self.cross_chain_transactions_repo.get_number_of_records()
 

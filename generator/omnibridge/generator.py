@@ -265,8 +265,8 @@ class OmnibridgeGenerator(BaseGenerator):
         )
 
         try:
-            self.xdai_cross_chain_transactions.populate_table(query_gnosis_to_ethereum)
-            self.xdai_cross_chain_transactions.populate_table(query_ethereum_to_gnosis)
+            self.xdai_cross_chain_transactions.execute(query_gnosis_to_ethereum)
+            self.xdai_cross_chain_transactions.execute(query_ethereum_to_gnosis)
 
             size = self.xdai_cross_chain_transactions.get_number_of_records()
 
@@ -409,8 +409,8 @@ class OmnibridgeGenerator(BaseGenerator):
         )
 
         try:
-            self.xdai_cross_chain_transactions.populate_table(query_gnosis_to_ethereum)
-            self.xdai_cross_chain_transactions.populate_table(query_ethereum_to_gnosis)
+            self.xdai_cross_chain_transactions.execute(query_gnosis_to_ethereum)
+            self.xdai_cross_chain_transactions.execute(query_ethereum_to_gnosis)
 
             size = self.xdai_cross_chain_transactions.get_number_of_records()
 
@@ -472,7 +472,7 @@ class OmnibridgeGenerator(BaseGenerator):
         )
 
         try:
-            self.operator_transactions.populate_table(query)
+            self.operator_transactions.execute(query)
 
             size = self.operator_transactions.get_number_of_records()
 

@@ -87,9 +87,6 @@ class AcrossCrossChainTransactionRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(AcrossCrossChainTransaction, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(AcrossCrossChainTransaction.id)).scalar()

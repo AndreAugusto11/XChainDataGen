@@ -1,5 +1,6 @@
 from sqlalchemy import BigInteger, Boolean, Column, Float, Integer, Numeric, String
 
+from repository.common.models import BlockchainTransaction
 from repository.database import Base
 
 
@@ -241,37 +242,8 @@ class PolygonBridgeWithdraw(Base):
         )
 
 
-class PolygonBlockchainTransaction(Base):
+class PolygonBlockchainTransaction(BlockchainTransaction):
     __tablename__ = "polygon_blockchain_transactions"
-
-    blockchain = Column(String(10), nullable=False)
-    transaction_hash = Column(String(66), nullable=False, primary_key=True)
-    block_number = Column(Integer, nullable=False)
-    timestamp = Column(BigInteger, nullable=False)
-    from_address = Column(String(42), nullable=False)
-    to_address = Column(String(42), nullable=False)
-    status = Column(Integer, nullable=False)
-    fee = Column(Numeric(30, 0), nullable=False)
-
-    def __init__(
-        self,
-        blockchain,
-        transaction_hash,
-        block_number,
-        timestamp,
-        from_address,
-        to_address,
-        status,
-        fee,
-    ):
-        self.blockchain = blockchain
-        self.transaction_hash = transaction_hash
-        self.block_number = block_number
-        self.timestamp = timestamp
-        self.from_address = from_address
-        self.to_address = to_address
-        self.status = status
-        self.fee = fee
 
     def __repr__(self):
         return (

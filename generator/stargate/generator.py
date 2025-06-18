@@ -414,7 +414,7 @@ class StargateGenerator(BaseGenerator):
         )
 
         try:
-            self.cross_chain_token_transfers_repo.populate_table(query)
+            self.cross_chain_token_transfers_repo.execute(query)
 
             size = self.cross_chain_token_transfers_repo.get_number_of_records()
 
@@ -528,7 +528,7 @@ class StargateGenerator(BaseGenerator):
         )
 
         try:
-            self.cross_chain_swap_repo.populate_table(query)
+            self.cross_chain_swap_repo.execute(query)
 
             size = self.cross_chain_swap_repo.get_number_of_records()
 
@@ -623,7 +623,7 @@ class StargateGenerator(BaseGenerator):
         )
 
         try:
-            self.oft_cross_chain_transactions.populate_table(query)
+            self.oft_cross_chain_transactions.execute(query)
 
             size = self.oft_cross_chain_transactions.get_number_of_records()
 
@@ -762,7 +762,7 @@ class StargateGenerator(BaseGenerator):
         )
 
         try:
-            self.bus_cross_chain_transactions_repo.populate_table(query)
+            self.bus_cross_chain_transactions_repo.execute(query)
 
             size = self.bus_cross_chain_transactions_repo.get_number_of_records()
 

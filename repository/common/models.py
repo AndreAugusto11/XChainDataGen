@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Float, Integer, String
+from sqlalchemy import BigInteger, Column, Date, Float, Integer, Numeric, String
 
 from repository.database import Base
 
@@ -61,3 +61,39 @@ class NativeToken(Base):
 
     def __repr__(self):
         return f"<Token(symbol={self.symbol}, blockchain={self.blockchain})>"
+
+
+class BlockchainTransaction(Base):
+    __abstract__ = True
+
+    blockchain = Column(String(10), nullable=False)
+    transaction_hash = Column(String(66), nullable=False, primary_key=True)
+    block_number = Column(Integer, nullable=False)
+    timestamp = Column(BigInteger, nullable=False)
+    from_address = Column(String(42), nullable=False)
+    to_address = Column(String(42), nullable=False)
+    status = Column(Integer, nullable=False)
+    value = Column(Numeric(30, 0), nullable=True)
+    fee = Column(Numeric(30, 0), nullable=False)
+
+    def __init__(
+        self,
+        blockchain,
+        transaction_hash,
+        block_number,
+        timestamp,
+        from_address,
+        to_address,
+        status,
+        value,
+        fee,
+    ):
+        self.blockchain = blockchain
+        self.transaction_hash = transaction_hash
+        self.block_number = block_number
+        self.timestamp = timestamp
+        self.from_address = from_address
+        self.to_address = to_address
+        self.status = status
+        self.value = value
+        self.fee = fee

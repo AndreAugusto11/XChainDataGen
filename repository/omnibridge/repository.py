@@ -81,9 +81,6 @@ class OmnibridgeCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(OmnibridgeCrossChainTransactions, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(OmnibridgeCrossChainTransactions.id)).scalar()
@@ -132,9 +129,6 @@ class OmnibridgeCrossChainTransactionsRepository(BaseRepository):
 class OmnibridgeOperatorTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(OmnibridgeOperatorTransactions, session_factory)
-
-    def populate_table(self, query):
-        return self.execute(query)
 
     def get_number_of_records(self):
         with self.get_session() as session:

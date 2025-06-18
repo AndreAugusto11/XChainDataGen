@@ -60,9 +60,6 @@ class CCIPCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(CCIPCrossChainTransactions, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(CCIPCrossChainTransactions.id)).scalar()

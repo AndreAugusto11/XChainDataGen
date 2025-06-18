@@ -91,16 +91,6 @@ class AcrossGenerator(BaseGenerator):
                 "src_timestamp",
                 "output_amount_usd",
             )
-            PriceGenerator.calculate_cctx_usd_values(
-                self.bridge,
-                self.across_relayer_refund_repo,
-                "across_relayer_refund",
-                "output_amount",
-                "dst_blockchain",
-                "dst_contract_address",
-                "src_timestamp",
-                "output_amount_usd",
-            )
             PriceGenerator.calculate_cctx_native_usd_values(
                 self.bridge,
                 self.across_cross_chain_token_transfers_repo,
@@ -208,7 +198,7 @@ class AcrossGenerator(BaseGenerator):
         )
 
         try:
-            self.across_cross_chain_token_transfers_repo.populate_table(query)
+            self.across_cross_chain_token_transfers_repo.execute(query)
 
             size = self.across_cross_chain_token_transfers_repo.get_number_of_records()
 
@@ -291,7 +281,7 @@ class AcrossGenerator(BaseGenerator):
         )
 
         try:
-            self.across_cross_chain_token_transfers_repo.populate_table(query)
+            self.across_cross_chain_token_transfers_repo.execute(query)
 
         except Exception as e:
             raise CustomException(

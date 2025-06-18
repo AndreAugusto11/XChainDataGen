@@ -11,6 +11,7 @@ class Bridge(Enum):
     RONIN = "ronin"
     OMNIBRIDGE = "omnibridge"
     DEBRIDGE = "debridge"
+    MAYAN = "mayan"
 
 
 BLOCKCHAIN_IDS = {
@@ -86,6 +87,30 @@ TOKEN_PRICING_SUPPORTED_BLOCKCHAINS = {
     "gnosis": "gnosis",
 }
 
+
+# Mapping of bridges to their respective RPC methods
+# The majority of bridges work fine using the 'eth_getTransactionReceipt' RPC method to
+# retrieve transaction data. This method is generally sufficient because most contracts
+# emit events that include the native token value when it is transferred, allowing us to
+# calculate the relevant amounts directly from event data. As a result, the 'tx.value'
+# field, which is not exported by 'eth_getTransactionReceipt', can typically be ignored.
+
+# However, there are exceptions where the event data does not provide all necessary
+# information, and in those cases, alternative methods (such as 'eth_getTransactionByHash')
+# must be used to obtain the full transaction details, including 'tx.value'. This is the
+# case for Mayan Bridge,
+
+BRIDGE_NEEDS_TRANSACTION_BY_HASH_RPC_METHOD = {
+    Bridge.STARGATE: False,
+    Bridge.CCTP: False,
+    Bridge.CCIP: False,
+    Bridge.ACROSS: False,
+    Bridge.POLYGON: False,
+    Bridge.RONIN: False,
+    Bridge.OMNIBRIDGE: False,
+    Bridge.DEBRIDGE: False,
+    Bridge.MAYAN: True,
+}
 
 RPCS_CONFIG_FILE = "config/rpcs_config.yaml"
 

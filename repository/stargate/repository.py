@@ -406,9 +406,6 @@ class StargateBusCrossChainTransactionRepository(CrossChainRepository):
     def __init__(self, session_factory):
         super().__init__(StargateBusCrossChainTransaction, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(StargateBusCrossChainTransaction.id)).scalar()
@@ -448,9 +445,6 @@ class StargateCrossChainSwapRepository(CrossChainRepository):
     def __init__(self, session_factory):
         super().__init__(StargateCrossChainSwap, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(StargateCrossChainSwap.id)).scalar()
@@ -488,9 +482,6 @@ class StargateOFTCrossChainTransactionRepository(CrossChainRepository):
     def __init__(self, session_factory):
         super().__init__(StargateOFTCrossChainTransaction, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(StargateOFTCrossChainTransaction.id)).scalar()
@@ -525,9 +516,6 @@ class StargateOFTCrossChainTransactionRepository(CrossChainRepository):
 class StargateCrossChainTokenTransferRepository(CrossChainRepository):
     def __init__(self, session_factory):
         super().__init__(StargateCrossChainTokenTransfers, session_factory)
-
-    def populate_table(self, query):
-        return self.execute(query)
 
     def get_number_of_records(self):
         with self.get_session() as session:

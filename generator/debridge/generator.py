@@ -216,7 +216,7 @@ class DebridgeGenerator(BaseGenerator):
         )
 
         try:
-            self.debridge_cross_chain_transactions.populate_table(query)
+            self.debridge_cross_chain_transactions.execute(query)
 
             size = self.debridge_cross_chain_transactions.get_number_of_records()
 

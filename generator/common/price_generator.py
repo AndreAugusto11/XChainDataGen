@@ -148,7 +148,7 @@ class PriceGenerator:
                         input_token,
                         src_contract_address,
                     )
-                    if metadata is None:
+                    if metadata is None or "symbol" not in metadata or "name" not in metadata:
                         return
 
                     token_symbol = metadata["symbol"]
@@ -202,7 +202,7 @@ class PriceGenerator:
                         output_token,
                         dst_contract_address,
                     )
-                    if metadata is None:
+                    if metadata is None or "symbol" not in metadata or "name" not in metadata:
                         return
 
                     token_symbol = metadata["symbol"]
@@ -273,7 +273,7 @@ class PriceGenerator:
 
         metadata = RPCClient.get_token_metadata(blockchain, token_contract)
 
-        if metadata is None:
+        if metadata is None or "symbol" not in metadata or "name" not in metadata:
             return None
 
         metadata["symbol"] = metadata["symbol"].upper()
@@ -468,7 +468,7 @@ class PriceGenerator:
         )
 
         try:
-            cctx_repo.populate_table(query)
+            cctx_repo.execute(query)
 
             total_value = cctx_repo.get_total_amount_usd_transacted()
 
@@ -529,7 +529,7 @@ class PriceGenerator:
         )
 
         try:
-            cctx_repo.populate_table(query)
+            cctx_repo.execute(query)
 
             end_time = time.time()
             log_to_cli(

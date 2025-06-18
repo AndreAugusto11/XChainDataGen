@@ -15,16 +15,33 @@ def test_extract_data():
 
     # now we can check if the data was extracted correctly
     # For example, we can check if the AcrossV3FundsDeposited table has been populated
-    from repository.across.repository import AcrossV3FundsDepositedRepository
+    from repository.across.repository import (
+        AcrossFilledV3RelayRepository,
+        AcrossRelayerRefundRepository,
+        AcrossV3FundsDepositedRepository,
+    )
     from repository.database import DBSession
 
     across_v3_funds_deposited = AcrossV3FundsDepositedRepository(DBSession)
+    across_filled_v3_relay_repo = AcrossFilledV3RelayRepository(DBSession)
+    across_relayer_refund_repo = AcrossRelayerRefundRepository(DBSession)
 
     events = across_v3_funds_deposited.get_all()
-
     print(f"Number of events in AcrossV3FundsDeposited: {len(events)}")
     assert len(events) == 911, (
         "Expected 911 events in AcrossV3FundsDepositedRepository table after extraction."
+    )
+
+    events = across_filled_v3_relay_repo.get_all()
+    print(f"Number of events in AcrossFilledV3Relay: {len(events)}")
+    assert len(events) == 912, (
+        "Expected 912 events in AcrossFilledV3RelayRepository table after extraction."
+    )
+
+    events = across_relayer_refund_repo.get_all()
+    print(f"Number of events in AcrossRelayerRefund: {len(events)}")
+    assert len(events) == 93, (
+        "Expected 93 events in AcrossRelayerRefundRepository table after extraction."
     )
 
     args = argparse.Namespace(

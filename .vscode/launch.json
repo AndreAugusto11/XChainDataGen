@@ -2,6 +2,21 @@
     "version": "0.2.0",
     "configurations": [
       {
+        "name": "Python: Run Current Test File",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "pytest",
+        "justMyCode": true,
+        "console": "integratedTerminal",
+        "python": "${workspaceFolder}/.xchaindata/bin/python3.11",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/testing" },
+        "args": [
+          "-vvv",
+          "-s",
+          "${file}"
+        ]
+      },
+      {
         "name": "Run All Tests",
         "type": "debugpy",
         "request": "launch",
@@ -191,6 +206,17 @@
         "justMyCode": true,
         "python": "${workspaceFolder}/.xchaindata/bin/python",
         "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/debridge" }
+      },
+      {
+        "name": "[Mayan Swift] test",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/__init__.py",
+        "args": ["extract", "--bridge", "mayan", "--start_ts", "1741219200", "--end_ts", "1741996800", "--blockchains", "ethereum", "base", "avalanche", "optimism", "arbitrum", "bnb", "polygon", "linea"],
+        "console": "integratedTerminal",
+        "justMyCode": true,
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
+        "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/mayan" }
       },
     ]
   }

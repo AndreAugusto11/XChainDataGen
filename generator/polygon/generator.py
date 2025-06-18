@@ -205,7 +205,7 @@ class PolygonGenerator(BaseGenerator):
         )
 
         try:
-            self.pos_bridge_cross_chain_transactions_repo.populate_table(query)
+            self.pos_bridge_cross_chain_transactions_repo.execute(query)
 
             size = self.pos_bridge_cross_chain_transactions_repo.get_number_of_records()
 
@@ -325,7 +325,7 @@ class PolygonGenerator(BaseGenerator):
         )
 
         try:
-            self.plasma_bridge_cross_chain_transactions_repo.populate_table(query)
+            self.plasma_bridge_cross_chain_transactions_repo.execute(query)
 
             size = self.plasma_bridge_cross_chain_transactions_repo.get_number_of_records()
 

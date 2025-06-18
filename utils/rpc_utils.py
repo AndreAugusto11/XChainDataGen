@@ -4,7 +4,11 @@ from itertools import cycle
 import requests
 import yaml
 
-from config.constants import MAX_NUM_THREADS_EXTRACTOR, RPCS_CONFIG_FILE
+from config.constants import (
+    BRIDGE_NEEDS_TRANSACTION_BY_HASH_RPC_METHOD,
+    MAX_NUM_THREADS_EXTRACTOR,
+    RPCS_CONFIG_FILE,
+)
 from utils.utils import CustomException, convert_blockchain_into_alchemy_id, load_alchemy_api_key
 
 
@@ -18,6 +22,9 @@ class RPCClient:
         self.rpc_sizes = {
             blockchain["name"]: len(blockchain["rpcs"]) for blockchain in self.blockchains
         }
+        self.requires_transaction_by_hash_rpc_call = BRIDGE_NEEDS_TRANSACTION_BY_HASH_RPC_METHOD[
+            bridge
+        ]  # noqa: E501
 
     def max_threads_per_blockchain(self, blockchain_name: str) -> int:
         func_name = "max_threads_per_blockchain"
@@ -133,6 +140,10 @@ class RPCClient:
     def process_transaction(self, blockchain: str, tx_hash: str, block_number: str) -> dict:
         import concurrent.futures
 
+        if self.requires_transaction_by_hash_rpc_call:
+            method_tx = "eth_getTransactionByHash"
+            params_tx = [tx_hash]
+
         method_receipt = "eth_getTransactionReceipt"
         params_receipt = [tx_hash]
 
@@ -142,6 +153,11 @@ class RPCClient:
         rpc = self.get_next_rpc(blockchain)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
+            if self.requires_transaction_by_hash_rpc_call:
+                future_tx = executor.submit(
+                    self.make_request, rpc, blockchain, method_tx, params_tx
+                )
+
             future_receipt = executor.submit(
                 self.make_request, rpc, blockchain, method_receipt, params_receipt
             )
@@ -149,8 +165,16 @@ class RPCClient:
                 self.make_request, rpc, blockchain, method_block, params_block
             )
 
+            if self.requires_transaction_by_hash_rpc_call:
+                response_tx = future_tx.result()
+            else:
+                response_tx = None
+
             response_receipt = future_receipt.result()
             response_block = future_block.result()
+
+            if response_receipt and response_tx:
+                response_receipt["result"]["value"] = response_tx["result"]["value"]
 
         return response_receipt["result"] if response_receipt else {}, response_block[
             "result"

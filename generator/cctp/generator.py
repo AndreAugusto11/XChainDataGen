@@ -170,7 +170,7 @@ class CctpGenerator(BaseGenerator):
         )
 
         try:
-            self.cctp_cross_chain_token_transfers_repo.populate_table(query)
+            self.cctp_cross_chain_token_transfers_repo.execute(query)
 
             size = self.cctp_cross_chain_token_transfers_repo.get_number_of_records()
 

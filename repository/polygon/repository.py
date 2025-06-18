@@ -162,9 +162,6 @@ class PolygonCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(PolygonCrossChainTransactions, session_factory)
 
-    def populate_table(self, query):
-        return self.execute(query)
-
     def get_number_of_records(self):
         with self.get_session() as session:
             return session.query(func.count(PolygonCrossChainTransactions.id)).scalar()
@@ -209,9 +206,6 @@ class PolygonCrossChainTransactionsRepository(BaseRepository):
 class PolygonPlasmaCrossChainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(PolygonPlasmaCrossChainTransactions, session_factory)
-
-    def populate_table(self, query):
-        return self.execute(query)
 
     def get_number_of_records(self):
         with self.get_session() as session:

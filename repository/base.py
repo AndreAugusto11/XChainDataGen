@@ -75,10 +75,6 @@ class BaseRepository:
 
 class CrossChainRepository(BaseRepository):
     @abstractmethod
-    def populate_table(self, query) -> None:
-        pass
-
-    @abstractmethod
     def get_number_of_records(self) -> None:
         pass
 

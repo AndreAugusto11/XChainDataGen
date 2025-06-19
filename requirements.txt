@@ -91,7 +91,7 @@ tornado==6.5.1
 traitlets==5.14.3
 types-requests==2.32.0.20241016
 typing_extensions==4.12.2
-urllib3==2.2.3
+urllib3==2.5.0
 wcwidth==0.2.13
 web3==7.6.0
 webencodings==0.5.1

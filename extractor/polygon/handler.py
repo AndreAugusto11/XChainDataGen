@@ -15,14 +15,14 @@ from repository.polygon.repository import (
     PolygonStateSyncedRepository,
     PolygonTokenDepositedRepository,
 )
-from utils.rpc_utils import RPCClient
+from rpcs.evm_rpc_client import EvmRPCClient
 from utils.utils import CustomException, log_error
 
 
 class PolygonHandler(BaseHandler):
     CLASS_NAME = "PolygonHandler"
 
-    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+    def __init__(self, rpc_client: EvmRPCClient, blockchains: list) -> None:
         super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.POLYGON
 

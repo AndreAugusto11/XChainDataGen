@@ -4,19 +4,26 @@ from typing import Any, Dict, List
 from annotated_types import T
 
 from config.constants import BLOCKCHAIN_IDS
-from utils.rpc_utils import RPCClient
+from rpcs.evm_rpc_client import EvmRPCClient
 from utils.utils import CustomException, convert_bin_to_hex
 
 
 class BaseHandler(ABC):
     CLASS_NAME = "BaseHandler"
 
-    def __init__(self, rpc_client: RPCClient, blockchains: List[str]):
+    def __init__(self, rpc_client: EvmRPCClient, blockchains: List[str]):
         self.rpc_client = rpc_client
         self.bind_db_to_repos()
 
         # Map of blockchains that are involved in the analysis, used to filter events.
         self.counterPartyBlockchainsMap = {b: True for b in blockchains}
+
+    def get_solana_bridge_program_id(self) -> str:
+        """
+        Returns the program ID of the Solana bridge.
+        This is a placeholder method and should be overridden in subclasses if needed.
+        """
+        raise NotImplementedError("This method should be implemented in subclasses.")
 
     @abstractmethod
     def handle_events(
@@ -60,26 +67,43 @@ class BaseHandler(ABC):
         pass
 
     def create_transaction_object(
-        self, blockchain: str, tx_receipt: Dict[str, Any], block: Dict[str, Any]
+        self, blockchain: str, tx_receipt: Dict[str, Any], timestamp: int
     ) -> None:
         func_name = "create_transaction_object"
         try:
-            return {
-                "blockchain": blockchain,
-                "transaction_hash": tx_receipt["transactionHash"],
-                "block_number": int(tx_receipt["blockNumber"], 0),
-                "timestamp": int(block["timestamp"], 16),
-                "from_address": tx_receipt["from"],
-                "to_address": tx_receipt["to"],
-                "status": int(tx_receipt["status"], 16),
-                "value": int(tx_receipt["value"], 16) if "value" in tx_receipt else None,
-                "fee": str(int(tx_receipt["gasUsed"], 0) * int(tx_receipt["effectiveGasPrice"], 0)),
-            }
+            if blockchain == "solana":
+                return {
+                    "blockchain": blockchain,
+                    "transaction_hash": tx_receipt["transaction"]["signatures"][0],
+                    "block_number": tx_receipt["slot"],
+                    "timestamp": timestamp,
+                    "from_address": None,
+                    "to_address": None,
+                    "status": 1 if tx_receipt["meta"]["err"] is not None else 0,
+                    "value": None,
+                    "fee": tx_receipt["meta"]["fee"],
+                }
+            else:
+                return {
+                    "blockchain": blockchain,
+                    "transaction_hash": tx_receipt["transactionHash"],
+                    "block_number": int(tx_receipt["blockNumber"], 0),
+                    "timestamp": int(timestamp, 16),
+                    "from_address": tx_receipt["from"],
+                    "to_address": tx_receipt["to"],
+                    "status": int(tx_receipt["status"], 16),
+                    "value": int(tx_receipt["value"], 16) if "value" in tx_receipt else None,
+                    "fee": str(
+                        int(tx_receipt["gasUsed"], 0) * int(tx_receipt["effectiveGasPrice"], 0)
+                    ),
+                }
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME,
                 func_name,
-                f"Tx Hash: {tx_receipt['transactionHash']}: {e}",
+                f"Tx Hash: {tx_receipt['transactionHash']}: {e}"
+                if "transactionHash" in tx_receipt
+                else f"Tx Signature: {tx_receipt['signature']}: {e}",
             ) from e
 
     @abstractmethod

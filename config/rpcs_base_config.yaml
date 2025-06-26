@@ -165,3 +165,7 @@ blockchains:
   - "https://linea-rpc.publicnode.com"
   - "https://1rpc.io/linea"
   - "https://rpc.linea.build"
+
+- name: solana
+  rpcs:
+  - "https://api.mainnet-beta.solana.com"

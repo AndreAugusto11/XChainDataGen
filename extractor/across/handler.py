@@ -10,14 +10,14 @@ from repository.across.repository import (
     AcrossV3FundsDepositedRepository,
 )
 from repository.database import DBSession
-from utils.rpc_utils import RPCClient
+from rpcs.evm_rpc_client import EvmRPCClient
 from utils.utils import CustomException, convert_bin_to_hex, log_error
 
 
 class AcrossHandler(BaseHandler):
     CLASS_NAME = "AcrossHandler"
 
-    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+    def __init__(self, rpc_client: EvmRPCClient, blockchains: list) -> None:
         super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.ACROSS
 

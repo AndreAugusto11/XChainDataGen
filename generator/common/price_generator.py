@@ -9,7 +9,7 @@ from repository.common.repository import (
     TokenMetadataRepository,
     TokenPriceRepository,
 )
-from utils.rpc_utils import RPCClient
+from rpcs.alchemy_client import AlchemyClient
 from utils.utils import (
     CliColor,
     CustomException,
@@ -271,7 +271,7 @@ class PriceGenerator:
             CliColor.INFO,
         )
 
-        metadata = RPCClient.get_token_metadata(blockchain, token_contract)
+        metadata = AlchemyClient.get_token_metadata(blockchain, token_contract)
 
         if metadata is None or "symbol" not in metadata or "name" not in metadata:
             return None
@@ -330,11 +330,11 @@ class PriceGenerator:
             return
 
         if blockchain is None and token_address is None:
-            token_prices = RPCClient.get_token_prices_by_symbol_or_address(
+            token_prices = AlchemyClient.get_token_prices_by_symbol_or_address(
                 start_ts, end_ts, symbol=symbol
             )
         else:
-            token_prices = RPCClient.get_token_prices_by_symbol_or_address(
+            token_prices = AlchemyClient.get_token_prices_by_symbol_or_address(
                 start_ts, end_ts, blockchain=blockchain, token_address=token_address
             )
 

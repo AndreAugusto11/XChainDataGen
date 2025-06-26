@@ -1,7 +1,8 @@
 import yaml
 
-from utils.rpc_utils import RPCClient
+from rpcs.evm_rpc_client import EvmRPCClient
 
+# we keep this global variable to store all the configurations
 final_configs = []
 
 
@@ -43,11 +44,20 @@ def test_rpcs(configs, blockchains):
         if config["name"] not in blockchains:
             continue
 
+        if config["name"] == "solana":
+            final_configs.append(
+                {
+                    "name": config["name"],
+                    "rpcs": config["rpcs"],
+                }
+            )
+            continue
+
         rpcs = []
 
         for rpc in config["rpcs"]:
             try:
-                response = RPCClient.plain_request(
+                response = EvmRPCClient.plain_request(
                     rpc,
                     "eth_getLogs",
                     [

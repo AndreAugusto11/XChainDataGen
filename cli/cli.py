@@ -1,7 +1,8 @@
 import argparse
 
 from config.constants import Bridge
-from extractor.extractor import Extractor
+from extractor.evm_extractor import EvmExtractor
+from extractor.solana_extractor import SolanaExtractor
 from generator.generator import Generator
 from repository.database import create_tables
 from rpcs import generate_rpc_configs
@@ -9,6 +10,7 @@ from utils.utils import (
     CliColor,
     CustomException,
     build_log_message_2,
+    build_log_message_solana,
     get_block_by_timestamp,
     get_enum_instance,
     load_module,
@@ -22,55 +24,113 @@ class Cli:
     def extract_data(args):
         blockchains = args.blockchains
 
-        size = len(blockchains)
         bridge = get_enum_instance(Bridge, args.bridge)
 
         Cli.load_db_models(bridge)
 
         for idx, blockchain in enumerate(blockchains):
-            start_block = get_block_by_timestamp(args.start_ts, blockchain)
-            end_block = get_block_by_timestamp(args.end_ts, blockchain)
-
             generate_rpc_configs(blockchain)
 
+            if blockchain == "solana":
+                Cli.extract_solana_data(
+                    idx,
+                    bridge,
+                    blockchain,
+                    args.start_signature,
+                    args.end_signature,
+                    blockchains,
+                )
+            else:
+                start_block = get_block_by_timestamp(args.start_ts, blockchain)
+                end_block = get_block_by_timestamp(args.end_ts, blockchain)
+                Cli.extract_evm_data(
+                    idx,
+                    bridge,
+                    blockchain,
+                    start_block,
+                    end_block,
+                    blockchains,
+                )
+
+    def extract_evm_data(idx, bridge, blockchain, start_block, end_block, blockchains):
+        log_to_cli(
+            build_log_message_2(
+                start_block,
+                end_block,
+                bridge,
+                blockchain,
+                f"{idx + 1}/{len(blockchains)} Starting extraction... ",
+            )
+        )
+
+        try:
             log_to_cli(
                 build_log_message_2(
                     start_block,
                     end_block,
                     bridge,
                     blockchain,
-                    f"{idx + 1}/{size} Starting extraction... ",
+                    "Loading contracts and ABIs...",
                 )
             )
-
-            try:
-                log_to_cli(
-                    build_log_message_2(
-                        start_block,
-                        end_block,
-                        bridge,
-                        blockchain,
-                        "Loading contracts and ABIs...",
-                    )
-                )
-                extractor = Extractor(bridge, blockchain, blockchains)
-            except Exception as e:
-                log_to_cli(
-                    build_log_message_2(
-                        start_block,
-                        end_block,
-                        bridge,
-                        blockchain,
-                        f"{idx + 1}/{size} Error: {e}",
-                    ),
-                    CliColor.ERROR,
-                )
-                return
-
-            extractor.extract_data(
-                start_block,
-                end_block,
+            extractor = EvmExtractor(bridge, blockchain, blockchains)
+        except Exception as e:
+            log_to_cli(
+                build_log_message_2(
+                    start_block,
+                    end_block,
+                    bridge,
+                    blockchain,
+                    f"{idx + 1}/{len(blockchains)} Error: {e}",
+                ),
+                CliColor.ERROR,
             )
+            return
+
+        extractor.extract_data(
+            start_block,
+            end_block,
+        )
+
+    def extract_solana_data(idx, bridge, blockchain, start_signature, end_signature, blockchains):
+        log_to_cli(
+            build_log_message_solana(
+                start_signature,
+                end_signature,
+                bridge,
+                blockchain,
+                f"{idx + 1}/{len(blockchains)} Starting extraction... ",
+            )
+        )
+
+        try:
+            log_to_cli(
+                build_log_message_solana(
+                    start_signature,
+                    end_signature,
+                    bridge,
+                    blockchain,
+                    "Loading Solana Decoder",
+                )
+            )
+            extractor = SolanaExtractor(bridge, blockchain, blockchains)
+        except Exception as e:
+            log_to_cli(
+                build_log_message_solana(
+                    start_signature,
+                    end_signature,
+                    bridge,
+                    blockchain,
+                    f"{idx + 1}/{len(blockchains)} Error: {e}",
+                ),
+                CliColor.ERROR,
+            )
+            return
+
+        extractor.extract_data(
+            start_signature,
+            end_signature,
+        )
 
     def generate_data(args):
         bridge = get_enum_instance(Bridge, args.bridge)
@@ -113,10 +173,36 @@ class Cli:
                 "linea",
                 "gnosis",
                 "ronin",
+                "solana",
             ],
             nargs="+",
             help="List of blockchains to extract data from",
         )
+
+        # Custom argument group for Solana-specific arguments
+        solana_group = extract_parser.add_argument_group(
+            "Solana-specific arguments", "Required if 'solana' is included in --blockchains"
+        )
+        solana_group.add_argument(
+            "--start_signature",
+            help="Start signature for Solana extraction (required if 'solana' is in --blockchains)",
+        )
+        solana_group.add_argument(
+            "--end_signature",
+            help="End signature for Solana extraction (required if 'solana' is in --blockchains)",
+        )
+
+        # Custom validation for Solana arguments
+        def validate_solana_args(args):
+            if args.blockchains and "solana" in args.blockchains:
+                if not args.start_signature or not args.end_signature:
+                    extract_parser.error(
+                        (
+                            "Arguments --start_signature and --end_signature are required when 'solana' is in --blockchains."  # noqa: E501
+                        )
+                    )
+
+        extract_parser.set_defaults(validate_solana_args=validate_solana_args)
 
         extract_parser.set_defaults(func=Cli.extract_data)
 

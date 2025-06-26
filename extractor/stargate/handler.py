@@ -31,14 +31,14 @@ from repository.stargate.repository import (
     StargateUlnConfigSetRepository,
     StargateVerifierFeeRepository,
 )
-from utils.rpc_utils import RPCClient
+from rpcs.evm_rpc_client import EvmRPCClient
 from utils.utils import CustomException, log_error, unpad_address
 
 
 class StargateHandler(BaseHandler):
     CLASS_NAME = "StargateHandler"
 
-    def __init__(self, rpc_client: RPCClient, blockchains: list) -> None:
+    def __init__(self, rpc_client: EvmRPCClient, blockchains: list) -> None:
         super().__init__(rpc_client, blockchains)
         self.bridge = Bridge.STARGATE
 

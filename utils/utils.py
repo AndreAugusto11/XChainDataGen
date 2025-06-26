@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 from enum import Enum
 
+import base58
 import requests
 from hexbytes import HexBytes
 
@@ -23,6 +24,20 @@ def load_alchemy_api_key() -> str:
     key = os.getenv("ALCHEMY_API_KEY")
     if not key:
         raise ValueError("ALCHEMY_API_KEY environment variable not set.")
+    return key
+
+
+def load_solana_decoder_url() -> str:
+    url = os.getenv("SOLANA_DECODER_URL")
+    if not url:
+        raise ValueError("SOLANA_DECODER_URL environment variable not set.")
+    return url
+
+
+def load_solana_api_key() -> str:
+    key = os.getenv("SOLANA_API_KEY")
+    if not key:
+        raise ValueError("SOLANA_API_KEY environment variable not set.")
     return key
 
 
@@ -90,6 +105,14 @@ def unpad_address(padded_address) -> str:
     # Extract the last 40 hex characters (20 bytes) which represent the address
     original_address = hex_str[-40:]
     return "0x" + original_address
+
+
+def convert_32_byte_array_to_evm_address(buffer: list) -> str:
+    return unpad_address(bytes(buffer).hex())
+
+
+def convert_32_byte_array_to_solana_address(buffer: list) -> str:
+    return base58.b58encode(bytes(buffer)).decode("utf-8")
 
 
 def log_error(bridge: Bridge, message: str):
@@ -161,6 +184,17 @@ def build_log_message_2(
     start_block: int, end_block: int, bridge: Bridge, blockchain: str, message: str = ""
 ):
     message = f"Block range {start_block}-{end_block} in {blockchain} -- {message}"
+    message = f"{datetime.now()} - INFO - {bridge.value} - {message}"
+
+    return message
+
+
+def build_log_message_solana(
+    start_sig: str, end_sig: str, bridge: Bridge, blockchain: str, message: str = ""
+):
+    short_start = f"{start_sig[:3]}...{start_sig[-3:]}"
+    short_end = f"{end_sig[:3]}...{end_sig[-3:]}"
+    message = f"Signature range {short_start}-{short_end} in {blockchain} -- {message}"
     message = f"{datetime.now()} - INFO - {bridge.value} - {message}"
 
     return message

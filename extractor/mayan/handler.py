@@ -70,17 +70,6 @@ class MayanHandler(BaseHandler):
         self.auction_bid_repo = MayanAuctionBidRepository(DBSession)
         self.auction_close_repo = MayanAuctionCloseRepository(DBSession)
 
-    def handle_transactions(self, transactions: List[Dict[str, Any]]) -> None:
-        func_name = "handle_transactions"
-        try:
-            self.blockchain_transaction_repo.create_all(transactions)
-        except Exception as e:
-            raise CustomException(
-                self.CLASS_NAME,
-                func_name,
-                f"Error writing transactions to database: {e}",
-            ) from e
-
     def does_transaction_exist_by_hash(self, transaction_hash: str) -> Any:
         func_name = "does_transaction_exist_by_hash"
         """

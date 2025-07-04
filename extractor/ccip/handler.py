@@ -79,7 +79,7 @@ class CcipHandler(BaseHandler):
                 if (
                     event["topic"]
                     == "0xd0c3c799bf9e2639de44391e7f524d229b2b55f5b1ea94b2bf7da42f7243dddd"
-                ):  # DepositForBurn
+                ):  # CCIPSendRequested
                     event = self.handle_send_requested(blockchain, event)
                 elif (
                     event["topic"]

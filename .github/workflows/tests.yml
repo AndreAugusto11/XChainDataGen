@@ -47,4 +47,3 @@ jobs:
       - name: Run tests with pytest
         run: |
           python -m pytest tests/** -vvv -s --tb=short --maxfail=1
-        continue-on-error: true

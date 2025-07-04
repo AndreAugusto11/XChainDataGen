@@ -97,15 +97,15 @@ class EvmExtractor(Extractor):
                 if self.handler.does_transaction_exist_by_hash(tx_hash):
                     continue
 
-                tx_receipt, block = self.rpc_client.process_transaction(
+                tx, block = self.rpc_client.process_transaction(
                     self.blockchain, log["transaction_hash"], log["block_number"]
                 )
 
-                if tx_receipt is None or block is None:
+                if tx is None or block is None:
                     raise Exception(tx_hash)
 
                 txs[tx_hash] = self.handler.create_transaction_object(
-                    self.blockchain, tx_receipt, block["timestamp"]
+                    self.blockchain, tx, block["timestamp"]
                 )
 
             except CustomException as e:
@@ -116,7 +116,20 @@ class EvmExtractor(Extractor):
                 log_error(self.bridge, request_desc)
 
         if len(txs) > 0:
-            self.handler.handle_transactions(txs.values())
+            try:
+                self.handler.handle_transactions(txs.values())
+            except CustomException:
+                # if there is an error while handling transactions in batch, we handle them one
+                # by one to avoid the entire batch failing
+                for tx in txs.values():
+                    try:
+                        self.handler.handle_transaction(tx)
+                    except CustomException as e:
+                        request_desc = (
+                            f"Error processing transaction: {self.blockchain}, "
+                            f"{tx['transaction_hash']}. Error: {e}"
+                        )
+                        log_error(self.bridge, request_desc)
 
     def extract_data(self, start_block: int, end_block: int):
         """Main extraction logic."""

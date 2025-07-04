@@ -1,6 +1,7 @@
 # ruff: noqa: E501
 from sqlalchemy import BigInteger, Boolean, Column, Float, Integer, Numeric, String
 
+from repository.common.models import BlockchainTransaction
 from repository.database import Base
 
 
@@ -742,40 +743,21 @@ class MayanAuctionClose(Base):
         )
 
 
-class MayanBlockchainTransaction(Base):
+class MayanBlockchainTransaction(BlockchainTransaction):
     __tablename__ = "mayan_blockchain_transactions"
 
-    blockchain = Column(String(10), nullable=False)
-    transaction_hash = Column(String(88), nullable=False, primary_key=True)
-    block_number = Column(Integer, nullable=False)
-    timestamp = Column(BigInteger, nullable=False)
-    from_address = Column(String(42), nullable=True)
-    to_address = Column(String(42), nullable=True)
-    status = Column(Integer, nullable=False)
-    value = Column(Numeric(30, 0), nullable=True)
-    fee = Column(Numeric(30, 0), nullable=False)
-
-    def __init__(
-        self,
-        blockchain,
-        transaction_hash,
-        block_number,
-        timestamp,
-        from_address,
-        to_address,
-        status,
-        value,
-        fee,
-    ):
-        self.blockchain = blockchain
-        self.transaction_hash = transaction_hash
-        self.block_number = block_number
-        self.timestamp = timestamp
-        self.from_address = from_address
-        self.to_address = to_address
-        self.status = status
-        self.value = value
-        self.fee = fee
+    def __repr__(self):
+        return (
+            f"<MayanBlockchainTransaction(blockchain={self.blockchain}, "
+            f"transaction_hash={self.transaction_hash}, "
+            f"block_number={self.block_number}, "
+            f"timestamp={self.timestamp} "
+            f"from_address={self.from_address}, "
+            f"to_address={self.to_address}, "
+            f"value={self.value}, "
+            f"status={self.status}, "
+            f"fee={self.fee}>"
+        )
 
 
 ########## Processed Data ##########
@@ -817,6 +799,10 @@ class MayanCrossChainTransaction(Base):
     refund_amount = Column(Numeric(30, 0), nullable=False)
     refund_amount_usd = Column(Float, nullable=True)
     refund_token = Column(String(44), nullable=False)
+    auction_id = Column(String(64), nullable=True)
+    auction_first_bid_timestamp = Column(BigInteger, nullable=True)
+    auction_last_bid_timestamp = Column(BigInteger, nullable=True)
+    auction_number_of_bids = Column(Integer, nullable=True)
 
     def __init__(
         self,
@@ -853,6 +839,10 @@ class MayanCrossChainTransaction(Base):
         refund_amount,
         refund_amount_usd,
         refund_token,
+        auction_id,
+        auction_first_bid_timestamp,
+        auction_last_bid_timestamp,
+        auction_number_of_bids,
     ):
         self.src_blockchain = src_blockchain
         self.src_transaction_hash = src_transaction_hash
@@ -887,3 +877,7 @@ class MayanCrossChainTransaction(Base):
         self.refund_amount = refund_amount
         self.refund_amount_usd = refund_amount_usd
         self.refund_token = refund_token
+        self.auction_id = auction_id
+        self.auction_first_bid_timestamp = auction_first_bid_timestamp
+        self.auction_last_bid_timestamp = auction_last_bid_timestamp
+        self.auction_number_of_bids = auction_number_of_bids

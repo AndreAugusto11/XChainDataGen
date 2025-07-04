@@ -35,7 +35,7 @@ def test_extract_data():
     mayan_swap_and_fwd = MayanSwapAndForwardedRepository(DBSession)
     events = mayan_swap_and_fwd.get_all()
     print(f"Number of events in MayanSwapAndForwarded: {len(events)}")
-    assert len(events) == 5, "Expected 5 events in MayanSwapAndForwarded table after extraction."
+    assert len(events) == 264, "Expected 264 events in MayanSwapAndForwarded table after extraction"
 
     mayan_order_created = MayanOrderCreatedRepository(DBSession)
     events = mayan_order_created.get_all()
@@ -57,7 +57,7 @@ def test_extract_data():
     mayan_forwarded = MayanForwardedRepository(DBSession)
     events = mayan_forwarded.get_all()
     print(f"Number of events in MayanForwarded: {len(events)}")
-    assert len(events) == 4, "Expected 4 events in MayanForwarded table after extraction."
+    assert len(events) == 460, "Expected 460 events in MayanForwarded table after extraction."
 
     mayan_blockchain_transaction = MayanBlockchainTransactionRepository(DBSession)
     transactions = mayan_blockchain_transaction.get_all()

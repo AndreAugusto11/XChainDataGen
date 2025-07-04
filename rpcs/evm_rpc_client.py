@@ -71,6 +71,7 @@ class EvmRPCClient(RPCClient):
 
             if response_receipt and response_tx:
                 response_receipt["result"]["value"] = response_tx["result"]["value"]
+                response_receipt["result"]["input"] = response_tx["result"]["input"]
 
         return response_receipt["result"] if response_receipt else {}, response_block[
             "result"

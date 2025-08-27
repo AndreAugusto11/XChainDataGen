@@ -51,7 +51,7 @@ class AcrossRelayerRefund(Base):
 
 
 class AcrossFilledV3Relay(Base):
-    __tablename__ = "across_filled_v3_relay"
+    __tablename__ = "across_filled_relay"
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     blockchain = Column(String(10), nullable=False)
@@ -144,8 +144,8 @@ class AcrossFilledV3Relay(Base):
         )
 
 
-class AcrossV3FundsDeposited(Base):
-    __tablename__ = "across_v3_funds_deposited"
+class AcrossFundsDeposited(Base):
+    __tablename__ = "across_funds_deposited"
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     blockchain = Column(String(10), nullable=False)
@@ -200,7 +200,7 @@ class AcrossV3FundsDeposited(Base):
 
     def __repr__(self):
         return (
-            f"<AcrossV3FundsDeposited(blockchain={self.blockchain},"
+            f"<AcrossFundsDeposited(blockchain={self.blockchain},"
             f"transaction_hash={self.transaction_hash}, "
             f"destination_chain={self.destination_chain}, "
             f"deposit_id={self.deposit_id}, "
@@ -235,12 +235,12 @@ class AcrossBlockchainTransaction(BlockchainTransaction):
 class AcrossCrossChainTransaction(Base):
     __tablename__ = "across_cross_chain_transactions"
 
-    id = Column(BigInteger, nullable=False, autoincrement=True, primary_key=True)
     src_blockchain = Column(String(10), nullable=False)
     src_transaction_hash = Column(String(66), nullable=False)
     src_from_address = Column(String(42), nullable=False)
     src_to_address = Column(String(42), nullable=False)
     src_fee = Column(Numeric(30, 0), nullable=False)
+    src_value = Column(Numeric(30, 0), nullable=True)
     src_fee_usd = Column(Float, nullable=True)
     src_timestamp = Column(BigInteger, nullable=False)
     dst_blockchain = Column(String(10), nullable=False)
@@ -249,6 +249,7 @@ class AcrossCrossChainTransaction(Base):
     dst_to_address = Column(String(42), nullable=False)
     dst_fee = Column(Numeric(30, 0), nullable=False)
     dst_fee_usd = Column(Float, nullable=True)
+    dst_value = Column(Numeric(30, 0), nullable=True)
     dst_timestamp = Column(BigInteger, nullable=False)
     deposit_id = Column(BigInteger, nullable=False)
     depositor = Column(String(42), nullable=False)

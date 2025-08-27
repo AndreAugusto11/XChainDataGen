@@ -14,7 +14,7 @@ def test_extract_data():
     Cli.extract_data(args)
 
     # now we can check if the data was extracted correctly
-    # For example, we can check if the AcrossV3FundsDeposited table has been populated
+    # For example, we can check if the AcrossFundsDeposited table has been populated
     from repository.across.repository import (
         AcrossFilledV3RelayRepository,
         AcrossRelayerRefundRepository,
@@ -27,7 +27,7 @@ def test_extract_data():
     across_relayer_refund_repo = AcrossRelayerRefundRepository(DBSession)
 
     events = across_v3_funds_deposited.get_all()
-    print(f"Number of events in AcrossV3FundsDeposited: {len(events)}")
+    print(f"Number of events in AcrossFundsDeposited: {len(events)}")
     assert len(events) == 911, (
         "Expected 911 events in AcrossV3FundsDepositedRepository table after extraction."
     )

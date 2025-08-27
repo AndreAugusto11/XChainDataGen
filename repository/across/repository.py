@@ -6,8 +6,8 @@ from .models import (
     AcrossBlockchainTransaction,
     AcrossCrossChainTransaction,
     AcrossFilledV3Relay,
+    AcrossFundsDeposited,
     AcrossRelayerRefund,
-    AcrossV3FundsDeposited,
 )
 
 
@@ -52,13 +52,13 @@ class AcrossFilledV3RelayRepository(BaseRepository):
 
 class AcrossV3FundsDepositedRepository(BaseRepository):
     def __init__(self, session_factory):
-        super().__init__(AcrossV3FundsDeposited, session_factory)
+        super().__init__(AcrossFundsDeposited, session_factory)
 
     def event_exists(self, deposit_id: str):
         with self.get_session() as session:
             return (
-                session.query(AcrossV3FundsDeposited)
-                .filter(AcrossV3FundsDeposited.deposit_id == deposit_id)
+                session.query(AcrossFundsDeposited)
+                .filter(AcrossFundsDeposited.deposit_id == deposit_id)
                 .first()
             )
 
@@ -137,5 +137,5 @@ class AcrossCrossChainTransactionRepository(BaseRepository):
 Index("ix_blockchain_transactions_tx_hash", AcrossBlockchainTransaction.transaction_hash)
 Index("ix_filled_v3_relay_tx_hash", AcrossFilledV3Relay.transaction_hash)
 Index("ix_filled_v3_relay_deposit_id", AcrossFilledV3Relay.deposit_id)
-Index("ix_funds_deposited_tx_hash", AcrossV3FundsDeposited.transaction_hash)
-Index("ix_funds_deposited_deposit_id", AcrossV3FundsDeposited.deposit_id)
+Index("ix_funds_deposited_tx_hash", AcrossFundsDeposited.transaction_hash)
+Index("ix_funds_deposited_deposit_id", AcrossFundsDeposited.deposit_id)

@@ -108,6 +108,9 @@ def unpad_address(padded_address) -> str:
 
 
 def convert_32_byte_array_to_evm_address(buffer: list) -> str:
+    if buffer is None:
+        return None
+
     return unpad_address(bytes(buffer).hex())
 
 

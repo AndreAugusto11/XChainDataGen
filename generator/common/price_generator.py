@@ -114,9 +114,11 @@ class PriceGenerator:
                 ):
                     token_metadata_repo.create(
                         {
-                            "symbol": symbol,
+                            "symbol": metadata["native_token"],
                             "name": name,
-                            "decimals": token_metadata.decimals,
+                            "decimals": token_metadata["decimals"]
+                            if isinstance(token_metadata, dict)
+                            else token_metadata.decimals,
                             "blockchain": blockchain,
                             "address": "0x0000000000000000000000000000000000000000",  # native token
                         }

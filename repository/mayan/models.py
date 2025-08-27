@@ -848,6 +848,14 @@ class MayanCrossChainTransaction(Base):
     auction_first_bid_timestamp = Column(BigInteger, nullable=True)
     auction_last_bid_timestamp = Column(BigInteger, nullable=True)
     auction_number_of_bids = Column(Integer, nullable=True)
+    native_fix_fee = Column(Numeric(30, 0), nullable=False)
+    native_fix_fee_usd = Column(Float, nullable=True)
+    percent_fee = Column(Numeric(30, 0), nullable=False)
+    percent_fee_usd = Column(Float, nullable=True)
+
+    # in mayan, percent_fee is usually 0.03% and goes to the protocol (paid on the dst chain)
+    # there is no fix fee (native_fix_fee)
+    # native_fee + percent_fee + give_amount = total cost of the transaction for the user
 
     def __init__(
         self,
@@ -897,6 +905,10 @@ class MayanCrossChainTransaction(Base):
         auction_first_bid_timestamp,
         auction_last_bid_timestamp,
         auction_number_of_bids,
+        native_fix_fee,
+        native_fix_fee_usd,
+        percent_fee,
+        percent_fee_usd,
     ):
         self.src_blockchain = src_blockchain
         self.src_transaction_hash = src_transaction_hash
@@ -944,3 +956,7 @@ class MayanCrossChainTransaction(Base):
         self.auction_first_bid_timestamp = auction_first_bid_timestamp
         self.auction_last_bid_timestamp = auction_last_bid_timestamp
         self.auction_number_of_bids = auction_number_of_bids
+        self.native_fix_fee = native_fix_fee
+        self.native_fix_fee_usd = native_fix_fee_usd
+        self.percent_fee = percent_fee
+        self.percent_fee_usd = percent_fee_usd

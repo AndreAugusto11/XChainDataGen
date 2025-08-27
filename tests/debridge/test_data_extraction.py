@@ -18,7 +18,6 @@ def test_extract_data():
         DeBridgeClaimedUnlockRepository,
         DeBridgeCreatedOrderRepository,
         DeBridgeFulfilledOrderRepository,
-        DeBridgeSentOrderUnlockRepository,
     )
 
     debridge_created_order_repo = DeBridgeCreatedOrderRepository(DBSession)
@@ -29,12 +28,6 @@ def test_extract_data():
     events = debridge_fulfilled_order_repo.get_all()
     print(f"Number of events in DeBridgeFulfilledOrder: {len(events)}")
     assert len(events) == 71, "Expected 71 events in DeBridgeFulfilledOrder table after extraction."
-    debridge_sent_order_unlock_repo = DeBridgeSentOrderUnlockRepository(DBSession)
-    events = debridge_sent_order_unlock_repo.get_all()
-    print(f"Number of events in DeBridgeSentOrderUnlock: {len(events)}")
-    assert len(events) == 147, (
-        "Expected 147 events in DeBridgeSentOrderUnlock table after extraction."
-    )
     debridge_claimed_unlock_repo = DeBridgeClaimedUnlockRepository(DBSession)
     events = debridge_claimed_unlock_repo.get_all()
     print(f"Number of events in DeBridgeClaimedUnlock: {len(events)}")

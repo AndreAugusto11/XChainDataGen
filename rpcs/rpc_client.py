@@ -123,7 +123,7 @@ class RPCClient(ABC):
                         f"{backoff} seconds.",
                     ),
                 )
-                backoff = (backoff * 2) if backoff < 30 else 0
+                backoff = (backoff * 2) if backoff < 30 else 30
 
         except Exception as e:
             raise CustomException(

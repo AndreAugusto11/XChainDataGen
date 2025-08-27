@@ -8,7 +8,7 @@
         "module": "pytest",
         "justMyCode": true,
         "console": "integratedTerminal",
-        "python": "${workspaceFolder}/.xchaindata/bin/python3.11",
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
         "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/testing" },
         "args": [
           "-vvv",
@@ -28,7 +28,7 @@
         ],
         "console": "integratedTerminal",
         "justMyCode": true,
-        "python": "${workspaceFolder}/.xchaindata/bin/python3.11",
+        "python": "${workspaceFolder}/.xchaindata/bin/python",
         "env": { "PYTHONPATH": "${workspaceFolder}", "DATABASE_URL": "postgresql://admin:pwd@localhost/testing" }
       },
       {
@@ -190,7 +190,7 @@
         "type": "debugpy",
         "request": "launch",
         "program": "${workspaceFolder}/__init__.py",
-        "args": ["extract", "--bridge", "debridge", "--start_ts", "1717196400", "--end_ts", "1733011200", "--blockchains", "ethereum", "arbitrum", "bnb", "base"],
+        "args": ["extract", "--bridge", "debridge", "--start_ts", "1751328000", "--end_ts", "1751414400", "--blockchains", "solana", "ethereum", "base", "avalanche", "optimism", "arbitrum", "bnb", "polygon", "linea", "--solana-range", "dst5MGcFPoBeREFAA5E3tU5ij8m5uVYwkzkSAbsLbNo:289c14AwMVuJtJteFhgXQdhdG7FbEMVsaFxKDCSRsRyZkyzNJPB8s6GGsvp1BqVpnVx2teHECeicVRjSEyvWTpgW:52SNSVHZQWw2C2aWALRF81jxVAApKnT67ryzmLC8j6wWhbcrziDVx4rXuhuNLZqkNFWXDWqeD6MEBbjemArGdhJP", "src5qyZHqTqecJV4aY6Cb6zDZLMDzrDKKezs22MPHr4:5vdCA5FvZmDfnLNXtg7FezMJum4AjTbSL3SFf1jDJrLE6CDLB98sYn8AJpzzB9s74gywYwMVKjiEEiu6xNr6gmPJ:4BD6XpXXydEzszppNfMTmUG5iNWuGHPorF1k6TVVp3Gpef8wqCAw4VMMVSMCDu1muoG2fpRb2ZLyo6VDLCX4P8ws"],
         "console": "integratedTerminal",
         "justMyCode": true,
         "python": "${workspaceFolder}/.xchaindata/bin/python",

@@ -4,7 +4,6 @@ from .repository import (
     DeBridgeCreatedOrderRepository,
     DeBridgeCrossChainTransactionsRepository,
     DeBridgeFulfilledOrderRepository,
-    DeBridgeSentOrderUnlockRepository,
 )
 
 __all__ = [
@@ -12,6 +11,5 @@ __all__ = [
     "DeBridgeCreatedOrderRepository",
     "DeBridgeFulfilledOrderRepository",
     "DeBridgeClaimedUnlockRepository",
-    "DeBridgeSentOrderUnlockRepository",
     "DeBridgeCrossChainTransactionsRepository",
 ]

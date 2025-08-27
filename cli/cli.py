@@ -81,9 +81,6 @@ class Cli:
             )
             extractor = EvmExtractor(bridge, blockchain, blockchains)
 
-            if idx == len(blockchains) - 1:
-                extractor.post_processing()
-
         except Exception as e:
             log_to_cli(
                 build_log_message_2(
@@ -101,6 +98,9 @@ class Cli:
             start_block,
             end_block,
         )
+
+        if idx == len(blockchains) - 1:
+            extractor.post_processing()
 
     def extract_solana_data(idx, bridge, blockchain, signature_ranges, blockchains):
         extractor = SolanaExtractor(bridge, blockchain, blockchains)

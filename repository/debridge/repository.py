@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import Index, func
 
 from repository.base import BaseRepository
 
@@ -8,7 +8,6 @@ from .models import (
     DeBridgeCreatedOrder,
     DeBridgeCrossChainTransactions,
     DeBridgeFulfilledOrder,
-    DeBridgeSentOrderUnlock,
 )
 
 
@@ -33,13 +32,21 @@ class DeBridgeCreatedOrderRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(DeBridgeCreatedOrder, session_factory)
 
-    def event_exists(self, order_id: str):
+    def event_exists(self, maker_order_nonce: str):
         with self.get_session() as session:
             return (
                 session.query(DeBridgeCreatedOrder)
-                .filter(DeBridgeCreatedOrder.order_id == order_id)
+                .filter(DeBridgeCreatedOrder.maker_order_nonce == maker_order_nonce)
                 .first()
             )
+
+    def update_middle_info_order_fulfilled(
+        self, order_id: str, middle_src_token: str, middle_src_amount: float
+    ):
+        with self.get_session() as session:
+            session.query(DeBridgeCreatedOrder).filter(
+                DeBridgeCreatedOrder.order_id == order_id
+            ).update({"original_token": middle_src_token, "original_amount": middle_src_amount})
 
 
 class DeBridgeFulfilledOrderRepository(BaseRepository):
@@ -53,6 +60,14 @@ class DeBridgeFulfilledOrderRepository(BaseRepository):
                 .filter(DeBridgeFulfilledOrder.order_id == order_id)
                 .first()
             )
+
+    def update_middle_info_order_fulfilled(
+        self, order_id: str, middle_dst_token: str, middle_dst_amount: float
+    ):
+        with self.get_session() as session:
+            session.query(DeBridgeFulfilledOrder).filter(
+                DeBridgeFulfilledOrder.order_id == order_id
+            ).update({"middle_dst_token": middle_dst_token, "middle_dst_amount": middle_dst_amount})
 
 
 class DeBridgeClaimedUnlockRepository(BaseRepository):
@@ -68,19 +83,6 @@ class DeBridgeClaimedUnlockRepository(BaseRepository):
             )
 
 
-class DeBridgeSentOrderUnlockRepository(BaseRepository):
-    def __init__(self, session_factory):
-        super().__init__(DeBridgeSentOrderUnlock, session_factory)
-
-    def event_exists(self, order_id: str):
-        with self.get_session() as session:
-            return (
-                session.query(DeBridgeSentOrderUnlock)
-                .filter(DeBridgeSentOrderUnlock.order_id == order_id)
-                .first()
-            )
-
-
 ########## Processed Data ##########
 
 
@@ -90,7 +92,7 @@ class DeBridgeCrossChainTransactionsRepository(BaseRepository):
 
     def get_number_of_records(self):
         with self.get_session() as session:
-            return session.query(func.count(DeBridgeCrossChainTransactions.id)).scalar()
+            return session.query(func.count(DeBridgeCrossChainTransactions.intent_id)).scalar()
 
     def empty_table(self):
         with self.get_session() as session:
@@ -133,3 +135,6 @@ class DeBridgeCrossChainTransactionsRepository(BaseRepository):
             return session.query(
                 func.sum(DeBridgeCrossChainTransactions.output_amount_usd)
             ).scalar()
+
+
+Index("idx_debridge_created_order_maker_order_nonce", DeBridgeCreatedOrder.maker_order_nonce)

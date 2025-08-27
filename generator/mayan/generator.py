@@ -135,6 +135,17 @@ class MayanGenerator(BaseGenerator):
                 "dst_timestamp",
                 "middle_dst_amount_usd",
             )
+            PriceGenerator.calculate_cctx_usd_values(
+                self.bridge,
+                self.cross_chain_transactions_repo,
+                "mayan_cross_chain_transactions",
+                "percent_fee",
+                "dst_blockchain",
+                "dst_contract_address",
+                "dst_timestamp",
+                "percent_fee_usd",
+            )
+
             PriceGenerator.calculate_cctx_native_usd_values(
                 self.bridge,
                 self.cross_chain_transactions_repo,
@@ -235,6 +246,10 @@ class MayanGenerator(BaseGenerator):
                             "auction_last_bid_timestamp"
                         ),
                         auction_data.c.auction_number_of_bids.label("auction_number_of_bids"),
+                        literal(0).label("native_fix_fee"),
+                        (
+                            MayanOrderFulfilled.net_amount * 0.000300090027 / (1 - 0.000300090027)
+                        ).label("percent_fee"),
                     )
                     .join(MayanOrderFulfilled, MayanInitOrder.order_hash == MayanOrderFulfilled.key)
                     .join(SrcTx, SrcTx.transaction_hash == MayanInitOrder.signature)
@@ -299,6 +314,10 @@ class MayanGenerator(BaseGenerator):
                         auction_first_bid_timestamp=row.auction_first_bid_timestamp,
                         auction_last_bid_timestamp=row.auction_last_bid_timestamp,
                         auction_number_of_bids=row.auction_number_of_bids,
+                        native_fix_fee=row.native_fix_fee,
+                        native_fix_fee_usd=None,
+                        percent_fee=row.percent_fee,
+                        percent_fee_usd=None,
                     )
                 )
 
@@ -346,7 +365,6 @@ class MayanGenerator(BaseGenerator):
                     MayanForwarded.blockchain.label("blockchain"),
                     MayanForwarded.transaction_hash.label("transaction_hash"),
                     MayanForwarded.trader.label("trader"),
-                    MayanForwarded.mayan_protocol.label("mayan_protocol"),
                     MayanForwarded.token.label("token"),
                     MayanForwarded.token_out.label("token_out"),
                     MayanForwarded.dst_addr.label("dst_addr"),
@@ -361,7 +379,6 @@ class MayanGenerator(BaseGenerator):
                     MayanSwapAndForwarded.blockchain.label("blockchain"),
                     MayanSwapAndForwarded.transaction_hash.label("transaction_hash"),
                     MayanSwapAndForwarded.trader.label("trader"),
-                    MayanSwapAndForwarded.mayan_protocol.label("mayan_protocol"),
                     MayanSwapAndForwarded.token_in.label("token"),
                     MayanSwapAndForwarded.token_out.label("token_out"),
                     MayanSwapAndForwarded.dst_addr.label("dst_addr"),
@@ -379,8 +396,8 @@ class MayanGenerator(BaseGenerator):
                     session.query(
                         Fwd.c.blockchain.label("src_blockchain"),
                         Fwd.c.transaction_hash.label("src_transaction_hash"),
-                        Fwd.c.trader.label("src_from_address"),
-                        Fwd.c.mayan_protocol.label("src_to_address"),
+                        SrcTx.from_address.label("src_from_address"),
+                        SrcTx.to_address.label("src_to_address"),
                         SrcTx.fee.label("src_fee"),
                         SrcTx.value.label("src_value"),
                         SrcTx.timestamp.label("src_timestamp"),
@@ -419,6 +436,8 @@ class MayanGenerator(BaseGenerator):
                         auction_data.c.auction_number_of_bids.label("auction_number_of_bids"),
                         Fwd.c.middle_src_token.label("middle_src_token"),
                         Fwd.c.middle_src_amount.label("middle_src_amount"),
+                        literal(0).label("native_fix_fee"),
+                        literal(0).label("percent_fee"),
                     )
                     .join(
                         MayanOrderCreated,
@@ -494,6 +513,10 @@ class MayanGenerator(BaseGenerator):
                         auction_first_bid_timestamp=row.auction_first_bid_timestamp,
                         auction_last_bid_timestamp=row.auction_last_bid_timestamp,
                         auction_number_of_bids=row.auction_number_of_bids,
+                        native_fix_fee=row.native_fix_fee,
+                        native_fix_fee_usd=None,
+                        percent_fee=row.percent_fee,
+                        percent_fee_usd=None,
                     )
                 )
 
@@ -541,7 +564,6 @@ class MayanGenerator(BaseGenerator):
                     MayanForwarded.blockchain.label("blockchain"),
                     MayanForwarded.transaction_hash.label("transaction_hash"),
                     MayanForwarded.trader.label("trader"),
-                    MayanForwarded.mayan_protocol.label("mayan_protocol"),
                     MayanForwarded.token.label("token"),
                     MayanForwarded.token_out.label("token_out"),
                     MayanForwarded.dst_addr.label("dst_addr"),
@@ -555,7 +577,6 @@ class MayanGenerator(BaseGenerator):
                     MayanSwapAndForwarded.blockchain.label("blockchain"),
                     MayanSwapAndForwarded.transaction_hash.label("transaction_hash"),
                     MayanSwapAndForwarded.trader.label("trader"),
-                    MayanSwapAndForwarded.mayan_protocol.label("mayan_protocol"),
                     MayanSwapAndForwarded.token_in.label("token"),
                     MayanSwapAndForwarded.token_out.label("token_out"),
                     MayanSwapAndForwarded.dst_addr.label("dst_addr"),
@@ -576,8 +597,8 @@ class MayanGenerator(BaseGenerator):
                     session.query(
                         Fwd.c.blockchain.label("src_blockchain"),
                         Fwd.c.transaction_hash.label("src_transaction_hash"),
-                        Fwd.c.trader.label("src_from_address"),
-                        Fwd.c.mayan_protocol.label("src_to_address"),
+                        SrcTx.from_address.label("src_from_address"),
+                        SrcTx.to_address.label("src_to_address"),
                         SrcTx.fee.label("src_fee"),
                         SrcTx.value.label("src_value"),
                         SrcTx.timestamp.label("src_timestamp"),
@@ -617,6 +638,10 @@ class MayanGenerator(BaseGenerator):
                             "auction_last_bid_timestamp"
                         ),
                         auction_data.c.auction_number_of_bids.label("auction_number_of_bids"),
+                        literal(0).label("native_fix_fee"),
+                        (
+                            MayanOrderFulfilled.net_amount * 0.000300090027 / (1 - 0.000300090027)
+                        ).label("percent_fee"),
                     )
                     .join(
                         MayanOrderCreated,
@@ -687,6 +712,10 @@ class MayanGenerator(BaseGenerator):
                         auction_first_bid_timestamp=row.auction_first_bid_timestamp,
                         auction_last_bid_timestamp=row.auction_last_bid_timestamp,
                         auction_number_of_bids=row.auction_number_of_bids,
+                        native_fix_fee=row.native_fix_fee,
+                        native_fix_fee_usd=None,
+                        percent_fee=row.percent_fee,
+                        percent_fee_usd=None,
                     )
                 )
 
@@ -876,6 +905,20 @@ class MayanGenerator(BaseGenerator):
                     MayanCrossChainTransaction.src_blockchain == "bnb",
                     MayanCrossChainTransaction.src_contract_address
                     == "0xb46584e0efdE3092e04010A13f2eAe62aDb3b9F0",
+                )
+                .values(input_amount_usd=None, refund_fee_usd=None)
+            )
+            session.execute(stmt)
+
+        # Also, we need to fix the USD values of the 'Bitcoin on Base' token
+        # because it is not worth the same as BTC
+        with self.cross_chain_transactions_repo.get_session() as session:
+            stmt = (
+                update(MayanCrossChainTransaction)
+                .where(
+                    MayanCrossChainTransaction.src_blockchain == "base",
+                    MayanCrossChainTransaction.src_contract_address
+                    == "0x0c41f1fc9022feb69af6dc666abfe73c9ffda7ce",
                 )
                 .values(input_amount_usd=None, refund_fee_usd=None)
             )

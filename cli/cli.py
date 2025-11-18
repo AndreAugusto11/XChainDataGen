@@ -149,6 +149,7 @@ class Cli:
                 "gnosis",
                 "ronin",
                 "solana",
+                "unichain",
             ],
             nargs="+",
             help="List of blockchains to extract data from",

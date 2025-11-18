@@ -112,7 +112,7 @@ class BaseHandler(ABC):
                     "to_address": tx["to"],
                     "status": int(tx["status"], 16),
                     "value": int(tx["value"], 16) if "value" in tx else None,
-                    "input_data": tx["input"] if "input" in tx else None,
+                    "input_data": tx["input"][:35000] if "input" in tx else None,
                     "fee": str(int(tx["gasUsed"], 0) * int(tx["effectiveGasPrice"], 0)),
                 }
         except Exception as e:

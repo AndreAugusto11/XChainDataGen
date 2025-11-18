@@ -50,14 +50,13 @@ class AcrossRelayerRefund(Base):
         )
 
 
-class AcrossFilledV3Relay(Base):
+class AcrossFilledRelay(Base):
     __tablename__ = "across_filled_relay"
 
-    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     blockchain = Column(String(10), nullable=False)
     transaction_hash = Column(String(66), nullable=False)
     src_chain = Column(String(10), nullable=False)
-    deposit_id = Column(Integer, nullable=False)
+    deposit_id = Column(String(78), nullable=False, primary_key=True)
     relayer = Column(String(42), nullable=False)
     input_token = Column(String(42), nullable=False)
     output_token = Column(String(42), nullable=False)
@@ -69,9 +68,9 @@ class AcrossFilledV3Relay(Base):
     exclusive_relayer = Column(String(42), nullable=False)
     depositor = Column(String(42), nullable=False)
     recipient = Column(String(42), nullable=False)
-    message = Column(String(10000), nullable=True)
+    message_hash = Column(String(64), nullable=True)
     updated_recipient = Column(String(42), nullable=False)
-    updated_message = Column(String(10000), nullable=True)
+    updated_message_hash = Column(String(64), nullable=True)
     updated_output_amount = Column(String(30), nullable=False)
     fill_type = Column(Integer, nullable=False)
 
@@ -92,9 +91,9 @@ class AcrossFilledV3Relay(Base):
         exclusive_relayer,
         depositor,
         recipient,
-        message,
+        message_hash,
         updated_recipient,
-        updated_message,
+        updated_message_hash,
         updated_output_amount,
         fill_type,
     ):
@@ -113,9 +112,9 @@ class AcrossFilledV3Relay(Base):
         self.exclusive_relayer = exclusive_relayer
         self.depositor = depositor
         self.recipient = recipient
-        self.message = message
+        self.message_hash = message_hash
         self.updated_recipient = updated_recipient
-        self.updated_message = updated_message
+        self.updated_message_hash = updated_message_hash
         self.updated_output_amount = updated_output_amount
         self.fill_type = fill_type
 
@@ -136,9 +135,9 @@ class AcrossFilledV3Relay(Base):
             f"exclusive_relayer={self.exclusive_relayer}, "
             f"depositor={self.depositor}, "
             f"recipient={self.recipient}, "
-            f"message={self.message}, "
+            f"message_hash={self.message_hash}, "
             f"updated_recipient={self.updated_recipient}, "
-            f"updated_message={self.updated_message}, "
+            f"updated_message_hash={self.updated_message_hash}, "
             f"updated_output_amount={self.updated_output_amount}, "
             f"fill_type={self.fill_type})>"
         )
@@ -147,11 +146,10 @@ class AcrossFilledV3Relay(Base):
 class AcrossFundsDeposited(Base):
     __tablename__ = "across_funds_deposited"
 
-    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     blockchain = Column(String(10), nullable=False)
     transaction_hash = Column(String(66), nullable=False)
     destination_chain = Column(String(24), nullable=False)
-    deposit_id = Column(Integer, nullable=False)
+    deposit_id = Column(String(78), nullable=False, primary_key=True)
     depositor = Column(String(42), nullable=False)
     input_token = Column(String(42), nullable=False)
     output_token = Column(String(42), nullable=False)
@@ -251,13 +249,27 @@ class AcrossCrossChainTransaction(Base):
     dst_fee_usd = Column(Float, nullable=True)
     dst_value = Column(Numeric(30, 0), nullable=True)
     dst_timestamp = Column(BigInteger, nullable=False)
-    deposit_id = Column(BigInteger, nullable=False)
+    refund_blockchain = Column(String(10), nullable=True)
+    refund_transaction_hash = Column(String(88), nullable=True)
+    refund_from_address = Column(String(44), nullable=True)
+    refund_to_address = Column(String(44), nullable=True)
+    refund_fee = Column(Numeric(30, 0), nullable=True)
+    refund_value = Column(Numeric(30, 0), nullable=True)
+    refund_fee_usd = Column(Float, nullable=True)
+    refund_timestamp = Column(BigInteger, nullable=True)
+    intent_id = Column(String(78), nullable=False, primary_key=True)
     depositor = Column(String(42), nullable=False)
     recipient = Column(String(42), nullable=False)
     src_contract_address = Column(String(42), nullable=False)
     dst_contract_address = Column(String(42), nullable=False)
     input_amount = Column(Numeric(30, 0), nullable=False)
     input_amount_usd = Column(Float, nullable=True)
+    middle_src_token = Column(String(44), nullable=True)
+    middle_src_amount = Column(Numeric(30, 0), nullable=True)
+    middle_src_amount_usd = Column(Float, nullable=True)
+    middle_dst_token = Column(String(44), nullable=True)
+    middle_dst_amount = Column(Numeric(30, 0), nullable=True)
+    middle_dst_amount_usd = Column(Float, nullable=True)
     output_amount = Column(Numeric(30, 0), nullable=False)
     output_amount_usd = Column(Float, nullable=True)
     quote_timestamp = Column(BigInteger, nullable=False)
@@ -265,83 +277,107 @@ class AcrossCrossChainTransaction(Base):
     exclusivity_deadline = Column(BigInteger, nullable=False)
     exclusive_relayer = Column(String(42), nullable=False)
     fill_type = Column(BigInteger, nullable=False)
+    native_fix_fee = Column(Numeric(30, 0), nullable=False)
+    native_fix_fee_usd = Column(Float, nullable=True)
+    percent_fee = Column(Numeric(30, 0), nullable=False)
+    percent_fee_usd = Column(Float, nullable=True)
 
     def __init__(
         self,
         src_blockchain,
         src_transaction_hash,
-        src_timestamp,
         src_from_address,
         src_to_address,
         src_fee,
+        src_value,
+        src_fee_usd,
+        src_timestamp,
         dst_blockchain,
         dst_transaction_hash,
-        dst_timestamp,
         dst_from_address,
         dst_to_address,
         dst_fee,
-        deposit_id,
+        dst_fee_usd,
+        dst_value,
+        dst_timestamp,
+        refund_blockchain,
+        refund_transaction_hash,
+        refund_from_address,
+        refund_to_address,
+        refund_fee,
+        refund_value,
+        refund_fee_usd,
+        refund_timestamp,
+        intent_id,
         depositor,
         recipient,
         src_contract_address,
         dst_contract_address,
         input_amount,
+        input_amount_usd,
+        middle_src_token,
+        middle_src_amount,
+        middle_src_amount_usd,
+        middle_dst_token,
+        middle_dst_amount,
+        middle_dst_amount_usd,
         output_amount,
+        output_amount_usd,
         quote_timestamp,
         fill_deadline,
         exclusivity_deadline,
         exclusive_relayer,
         fill_type,
+        native_fix_fee,
+        native_fix_fee_usd,
+        percent_fee,
+        percent_fee_usd,
     ):
         self.src_blockchain = src_blockchain
         self.src_transaction_hash = src_transaction_hash
-        self.src_timestamp = src_timestamp
         self.src_from_address = src_from_address
         self.src_to_address = src_to_address
         self.src_fee = src_fee
+        self.src_value = src_value
+        self.src_fee_usd = src_fee_usd
+        self.src_timestamp = src_timestamp
         self.dst_blockchain = dst_blockchain
         self.dst_transaction_hash = dst_transaction_hash
-        self.dst_timestamp = dst_timestamp
         self.dst_from_address = dst_from_address
         self.dst_to_address = dst_to_address
         self.dst_fee = dst_fee
-        self.deposit_id = deposit_id
+        self.dst_fee_usd = dst_fee_usd
+        self.dst_value = dst_value
+        self.dst_timestamp = dst_timestamp
+        self.refund_blockchain = refund_blockchain
+        self.refund_transaction_hash = refund_transaction_hash
+        self.refund_from_address = refund_from_address
+        self.refund_to_address = refund_to_address
+        self.refund_fee = refund_fee
+        self.refund_value = refund_value
+        self.refund_fee_usd = refund_fee_usd
+        self.refund_timestamp = refund_timestamp
+        self.intent_id = intent_id
         self.depositor = depositor
         self.recipient = recipient
         self.src_contract_address = src_contract_address
         self.dst_contract_address = dst_contract_address
         self.input_amount = input_amount
+        self.input_amount_usd = input_amount_usd
+        self.middle_src_token = middle_src_token
+        self.middle_src_amount = middle_src_amount
+        self.middle_src_amount_usd = middle_src_amount_usd
+        self.middle_dst_token = middle_dst_token
+        self.middle_dst_amount = middle_dst_amount
+        self.middle_dst_amount_usd = middle_dst_amount_usd
         self.output_amount = output_amount
+        self.output_amount_usd = output_amount_usd
         self.quote_timestamp = quote_timestamp
         self.fill_deadline = fill_deadline
         self.exclusivity_deadline = exclusivity_deadline
         self.exclusive_relayer = exclusive_relayer
         self.fill_type = fill_type
-
-    def __repr__(self):
-        return (
-            f"<AcrossCrossChainTransaction(src_blockchain={self.src_blockchain},"
-            f"src_transaction_hash={self.src_transaction_hash}, "
-            f"src_timestamp={self.src_timestamp}, "
-            f"src_from_address={self.src_from_address}, "
-            f"src_to_address={self.src_to_address}, "
-            f"src_fee={self.src_fee}, "
-            f"dst_blockchain={self.dst_blockchain}, "
-            f"dst_transaction_hash={self.dst_transaction_hash}, "
-            f"dst_timestamp={self.dst_timestamp}, "
-            f"dst_from_address={self.dst_from_address}, "
-            f"dst_to_address={self.dst_to_address}, "
-            f"dst_fee={self.dst_fee}, "
-            f"deposit_id={self.deposit_id}, "
-            f"depositor={self.depositor}, "
-            f"recipient={self.recipient}, "
-            f"src_contract_address={self.src_contract_address}, "
-            f"dst_contract_address={self.dst_contract_address}, "
-            f"input_amount={self.input_amount}, "
-            f"output_amount={self.output_amount}, "
-            f"quote_timestamp={self.quote_timestamp}, "
-            f"fill_deadline={self.fill_deadline}, "
-            f"exclusivity_deadline={self.exclusivity_deadline}, "
-            f"exclusive_relayer={self.exclusive_relayer}, "
-            f"fill_type={self.fill_type})>"
-        )
+        self.native_fix_fee = native_fix_fee
+        self.native_fix_fee_usd = native_fix_fee_usd
+        self.percent_fee = percent_fee
+        self.percent_fee_usd = percent_fee_usd

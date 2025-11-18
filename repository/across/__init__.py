@@ -1,15 +1,15 @@
 from .repository import (
     AcrossBlockchainTransactionRepository,
     AcrossCrossChainTransactionRepository,
-    AcrossFilledV3RelayRepository,
+    AcrossFilledRelayRepository,
+    AcrossFundsDepositedRepository,
     AcrossRelayerRefundRepository,
-    AcrossV3FundsDepositedRepository,
 )
 
 __all__ = [
     "AcrossRelayerRefundRepository",
-    "AcrossFilledV3RelayRepository",
-    "AcrossV3FundsDepositedRepository",
+    "AcrossFilledRelayRepository",
+    "AcrossFundsDepositedRepository",
     "AcrossBlockchainTransactionRepository",
     "AcrossCrossChainTransactionRepository",
 ]

@@ -5,7 +5,7 @@ from repository.base import BaseRepository
 from .models import (
     AcrossBlockchainTransaction,
     AcrossCrossChainTransaction,
-    AcrossFilledV3Relay,
+    AcrossFilledRelay,
     AcrossFundsDeposited,
     AcrossRelayerRefund,
 )
@@ -37,20 +37,20 @@ class AcrossRelayerRefundRepository(BaseRepository):
             )
 
 
-class AcrossFilledV3RelayRepository(BaseRepository):
+class AcrossFilledRelayRepository(BaseRepository):
     def __init__(self, session_factory):
-        super().__init__(AcrossFilledV3Relay, session_factory)
+        super().__init__(AcrossFilledRelay, session_factory)
 
     def event_exists(self, deposit_id: str):
         with self.get_session() as session:
             return (
-                session.query(AcrossFilledV3Relay)
-                .filter(AcrossFilledV3Relay.deposit_id == deposit_id)
+                session.query(AcrossFilledRelay)
+                .filter(AcrossFilledRelay.deposit_id == deposit_id)
                 .first()
             )
 
 
-class AcrossV3FundsDepositedRepository(BaseRepository):
+class AcrossFundsDepositedRepository(BaseRepository):
     def __init__(self, session_factory):
         super().__init__(AcrossFundsDeposited, session_factory)
 
@@ -89,17 +89,11 @@ class AcrossCrossChainTransactionRepository(BaseRepository):
 
     def get_number_of_records(self):
         with self.get_session() as session:
-            return session.query(func.count(AcrossCrossChainTransaction.id)).scalar()
+            return session.query(func.count(AcrossCrossChainTransaction.intent_id)).scalar()
 
     def empty_table(self):
         with self.get_session() as session:
             return session.query(AcrossCrossChainTransaction).delete()
-
-    def update_amount_usd(self, transaction_hash: str, amount_usd: float):
-        with self.get_session() as session:
-            session.query(AcrossCrossChainTransaction).filter(
-                AcrossCrossChainTransaction.src_transaction_hash == transaction_hash
-            ).update({"amount_usd": amount_usd})
 
     def get_by_src_tx_hash(self, src_tx_hash: str):
         with self.get_session() as session:
@@ -135,7 +129,7 @@ class AcrossCrossChainTransactionRepository(BaseRepository):
 
 
 Index("ix_blockchain_transactions_tx_hash", AcrossBlockchainTransaction.transaction_hash)
-Index("ix_filled_v3_relay_tx_hash", AcrossFilledV3Relay.transaction_hash)
-Index("ix_filled_v3_relay_deposit_id", AcrossFilledV3Relay.deposit_id)
+Index("ix_filled_v3_relay_tx_hash", AcrossFilledRelay.transaction_hash)
+Index("ix_filled_v3_relay_deposit_id", AcrossFilledRelay.deposit_id)
 Index("ix_funds_deposited_tx_hash", AcrossFundsDeposited.transaction_hash)
 Index("ix_funds_deposited_deposit_id", AcrossFundsDeposited.deposit_id)

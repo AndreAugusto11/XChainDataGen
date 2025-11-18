@@ -5,13 +5,13 @@ from extractor.across.constants import BRIDGE_CONFIG
 from extractor.base_handler import BaseHandler
 from repository.across.repository import (
     AcrossBlockchainTransactionRepository,
-    AcrossFilledV3RelayRepository,
+    AcrossFilledRelayRepository,
+    AcrossFundsDepositedRepository,
     AcrossRelayerRefundRepository,
-    AcrossV3FundsDepositedRepository,
 )
 from repository.database import DBSession
 from rpcs.evm_rpc_client import EvmRPCClient
-from utils.utils import CustomException, convert_bin_to_hex, log_error
+from utils.utils import CustomException, convert_bin_to_hex, log_error, unpad_address
 
 
 class AcrossHandler(BaseHandler):
@@ -30,8 +30,8 @@ class AcrossHandler(BaseHandler):
 
     def bind_db_to_repos(self):
         self.blockchain_transaction_repo = AcrossBlockchainTransactionRepository(DBSession)
-        self.across_filled_v3_relay_repo = AcrossFilledV3RelayRepository(DBSession)
-        self.across_v3_funds_deposited_repo = AcrossV3FundsDepositedRepository(DBSession)
+        self.across_filled_relay_repo = AcrossFilledRelayRepository(DBSession)
+        self.across_funds_deposited_repo = AcrossFundsDepositedRepository(DBSession)
         self.across_relayer_refund_repo = AcrossRelayerRefundRepository(DBSession)
 
     def handle_transactions(self, transactions: List[Dict[str, Any]]) -> None:
@@ -80,17 +80,17 @@ class AcrossHandler(BaseHandler):
             try:
                 if (
                     event["topic"]
-                    == "0xa123dc29aebf7d0c3322c8eeb5b999e859f39937950ed31056532713d0de396f"
-                ):  # V3FundsDeposited
-                    event = self.handle_v3_funds_deposited(blockchain, event)
+                    == "0x32ed1a409ef04c7b0227189c3a103dc5ac10e775a15b785dcc510201f7c25ad3"
+                ):  # FundsDeposited
+                    event = self.handle_funds_deposited(blockchain, event)
                 elif (
                     event["topic"]
-                    == "0x571749edf1d5c9599318cdbc4e28a6475d65e87fd3b2ddbe1e9a8d5e7a0f0ff7"
-                ):  # FilledV3Relay
-                    event = self.handle_filled_v3_relay(blockchain, event)
+                    == "0x44b559f101f8fbcc8a0ea43fa91a05a729a5ea6e14a7c75aa750374690137208"
+                ):  # FilledRelay
+                    event = self.handle_filled_relay(blockchain, event)
                 elif (
                     event["topic"]
-                    == "0xf8bd640004bcec1b89657020f561d0b070cbdf662d0b158db9dccb0a8301bfab"
+                    == "0xf4ad92585b1bc117fbdd644990adf0827bc4c95baeae8a23322af807b6d0020e"
                 ):  # ExecutedRelayerRefundRoot
                     event = self.handle_relayer_refund(blockchain, event)
 
@@ -106,8 +106,8 @@ class AcrossHandler(BaseHandler):
 
         return included_events
 
-    def handle_v3_funds_deposited(self, blockchain, event):
-        func_name = "v3_funds_deposited"
+    def handle_funds_deposited(self, blockchain, event):
+        func_name = "handle_funds_deposited"
 
         destination_chain = self.convert_id_to_blockchain_name(event["destinationChainId"])
 
@@ -115,25 +115,25 @@ class AcrossHandler(BaseHandler):
             return None
 
         try:
-            if self.across_v3_funds_deposited_repo.event_exists(event["depositId"]):
+            if self.across_funds_deposited_repo.event_exists(str(event["depositId"])):
                 return None
 
-            self.across_v3_funds_deposited_repo.create(
+            self.across_funds_deposited_repo.create(
                 {
                     "blockchain": blockchain,
                     "transaction_hash": event["transaction_hash"],
                     "destination_chain": destination_chain,
                     "deposit_id": event["depositId"],
-                    "depositor": event["depositor"],
-                    "input_token": event["inputToken"],
-                    "output_token": event["outputToken"],
+                    "depositor": unpad_address(event["depositor"]),
+                    "input_token": unpad_address(event["inputToken"]),
+                    "output_token": unpad_address(event["outputToken"]),
                     "input_amount": str(event["inputAmount"]),
                     "output_amount": str(event["outputAmount"]),
                     "quote_timestamp": event["quoteTimestamp"],
                     "fill_deadline": event["fillDeadline"],
                     "exclusivity_deadline": event["exclusivityDeadline"],
-                    "recipient": event["recipient"],
-                    "exclusive_relayer": event["exclusiveRelayer"],
+                    "recipient": unpad_address(event["recipient"]),
+                    "exclusive_relayer": unpad_address(event["exclusiveRelayer"]),
                     "message": event["message"],
                 }
             )
@@ -145,8 +145,8 @@ class AcrossHandler(BaseHandler):
                 f"{blockchain} -- Tx Hash: {event['transaction_hash']}. Error writing to DB: {e}",
             ) from e
 
-    def handle_filled_v3_relay(self, blockchain, event):
-        func_name = "filled_v3_relay"
+    def handle_filled_relay(self, blockchain, event):
+        func_name = "handle_filled_relay"
 
         origin_chain = self.convert_id_to_blockchain_name(event["originChainId"])
         repayment_chain = self.convert_id_to_blockchain_name(event["repaymentChainId"])
@@ -155,30 +155,32 @@ class AcrossHandler(BaseHandler):
             return None
 
         try:
-            if self.across_filled_v3_relay_repo.event_exists(event["depositId"]):
+            if self.across_filled_relay_repo.event_exists(str(event["depositId"])):
                 return None
 
-            self.across_filled_v3_relay_repo.create(
+            self.across_filled_relay_repo.create(
                 {
                     "blockchain": blockchain,
                     "transaction_hash": event["transaction_hash"],
                     "src_chain": origin_chain,
                     "deposit_id": str(event["depositId"]),
-                    "relayer": event["relayer"],
-                    "input_token": event["inputToken"],
-                    "output_token": event["outputToken"],
+                    "relayer": unpad_address(event["relayer"]),
+                    "input_token": unpad_address(event["inputToken"]),
+                    "output_token": unpad_address(event["outputToken"]),
                     "input_amount": str(event["inputAmount"]),
                     "output_amount": str(event["outputAmount"]),
                     "repayment_chain": repayment_chain,
-                    "fill_deadline": str(event["fillDeadline"]),
-                    "exclusivity_deadline": str(event["exclusivityDeadline"]),
-                    "exclusive_relayer": event["exclusiveRelayer"],
-                    "depositor": event["depositor"],
-                    "recipient": event["recipient"],
-                    "message": event["message"],
-                    "updated_recipient": event["relayExecutionInfo"]["updatedRecipient"],
-                    "updated_message": convert_bin_to_hex(
-                        event["relayExecutionInfo"]["updatedMessage"]
+                    "fill_deadline": event["fillDeadline"],
+                    "exclusivity_deadline": event["exclusivityDeadline"],
+                    "exclusive_relayer": unpad_address(event["exclusiveRelayer"]),
+                    "depositor": unpad_address(event["depositor"]),
+                    "recipient": unpad_address(event["recipient"]),
+                    "message_hash": event["messageHash"],
+                    "updated_recipient": unpad_address(
+                        event["relayExecutionInfo"]["updatedRecipient"]
+                    ),
+                    "updated_message_hash": convert_bin_to_hex(
+                        event["relayExecutionInfo"]["updatedMessageHash"]
                     ),
                     "updated_output_amount": str(
                         event["relayExecutionInfo"]["updatedOutputAmount"]

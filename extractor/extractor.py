@@ -1,9 +1,9 @@
 import time
 from abc import ABC, abstractmethod
 from queue import Queue
-from urllib.request import BaseHandler
 
 from config.constants import Bridge
+from extractor.base_handler import BaseHandler
 from utils.utils import (
     CliColor,
     CustomException,

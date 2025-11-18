@@ -13,14 +13,14 @@ class AcrossDecoder(BaseDecoder):
     def decode_event(self, contract: Contract, log: dict):
         func_name = "decode_event"
 
-        if log["topics"][0] == "0xa123dc29aebf7d0c3322c8eeb5b999e859f39937950ed31056532713d0de396f":
-            return contract.events.V3FundsDeposited().process_log(log)["args"]
+        if log["topics"][0] == "0x32ed1a409ef04c7b0227189c3a103dc5ac10e775a15b785dcc510201f7c25ad3":
+            return contract.events.FundsDeposited().process_log(log)["args"]
         elif (
-            log["topics"][0] == "0x571749edf1d5c9599318cdbc4e28a6475d65e87fd3b2ddbe1e9a8d5e7a0f0ff7"
+            log["topics"][0] == "0x44b559f101f8fbcc8a0ea43fa91a05a729a5ea6e14a7c75aa750374690137208"
         ):
-            return contract.events.FilledV3Relay().process_log(log)["args"]
+            return contract.events.FilledRelay().process_log(log)["args"]
         elif (
-            log["topics"][0] == "0xf8bd640004bcec1b89657020f561d0b070cbdf662d0b158db9dccb0a8301bfab"
+            log["topics"][0] == "0xf4ad92585b1bc117fbdd644990adf0827bc4c95baeae8a23322af807b6d0020e"
         ):
             return contract.events.ExecutedRelayerRefundRoot().process_log(log)["args"]
 

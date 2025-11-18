@@ -14,6 +14,19 @@ BRIDGE_CONFIG = {
                 ],
             },
         ],
+        "unichain": [
+            {
+                "abi": "across",
+                "contracts": [
+                    "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",  # Across Protocol: SpokePool
+                ],
+                "topics": [
+                    "0x32ed1a409ef04c7b0227189c3a103dc5ac10e775a15b785dcc510201f7c25ad3",  # FundsDeposited
+                    "0x44b559f101f8fbcc8a0ea43fa91a05a729a5ea6e14a7c75aa750374690137208",  # FilledRelay
+                    "0xf4ad92585b1bc117fbdd644990adf0827bc4c95baeae8a23322af807b6d0020e",  # ExecutedRelayerRefundRoot
+                ],
+            },
+        ],
         "arbitrum": [
             {
                 "abi": "across",

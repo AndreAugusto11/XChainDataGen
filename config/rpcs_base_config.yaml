@@ -10,6 +10,18 @@ blockchains:
   - "https://ronin.drpc.org"
   - "https://api.roninchain.com/rpc"
 
+- name: unichain
+  contract: "0x078d782b760474a361dda0af3839290b0ef57ad6"
+  topics:
+  - "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+  start_block: "0x1EDF248"
+  end_block: "0x1EDF250"
+  rpcs:
+  - "https://0xrpc.io/uni"
+  - "https://unichain.drpc.org"
+  - "https://unichain-rpc.publicnode.com"
+  - "https://rpc.poolz.finance/unichain"
+
 - name: arbitrum
   contract: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
   topics:
@@ -169,4 +181,4 @@ blockchains:
 
 - name: solana
   rpcs:
-  - "https://api.mainnet-beta.solana.com"
+  - "https://svc.blockdaemon.com/solana/mainnet/native"

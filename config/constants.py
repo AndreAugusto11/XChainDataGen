@@ -69,6 +69,11 @@ BLOCKCHAIN_IDS = {
         "name": "ronin",
         "native_token": "AXS",
     },
+    "130": {
+        "name": "unichain",
+        "native_token": "WETH",
+        "native_token_contract": "0x4200000000000000000000000000000000000006",
+    },
     "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d": { # genesis hash for Solana
         "name": "solana",
         "native_token": "SOL",

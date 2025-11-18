@@ -1,16 +1,23 @@
 import time
 
-from sqlalchemy import text
+from sqlalchemy import and_, insert, join, literal, null, select, text
+from sqlalchemy.orm import aliased
 
 from config.constants import Bridge
 from generator.base_generator import BaseGenerator
 from generator.common.price_generator import PriceGenerator
+from repository.across.models import (
+    AcrossBlockchainTransaction,
+    AcrossCrossChainTransaction,
+    AcrossFilledRelay,
+    AcrossFundsDeposited,
+)
 from repository.across.repository import (
     AcrossBlockchainTransactionRepository,
     AcrossCrossChainTransactionRepository,
-    AcrossFilledV3RelayRepository,
+    AcrossFilledRelayRepository,
+    AcrossFundsDepositedRepository,
     AcrossRelayerRefundRepository,
-    AcrossV3FundsDepositedRepository,
 )
 from repository.common.repository import (
     NativeTokenRepository,
@@ -38,8 +45,8 @@ class AcrossGenerator(BaseGenerator):
     def bind_db_to_repos(self):
         self.transactions_repo = AcrossBlockchainTransactionRepository(DBSession)
         self.across_relayer_refund_repo = AcrossRelayerRefundRepository(DBSession)
-        self.across_filled_v3_relay_repo = AcrossFilledV3RelayRepository(DBSession)
-        self.across_v3_funds_deposited_repo = AcrossV3FundsDepositedRepository(DBSession)
+        self.across_filled_v3_relay_repo = AcrossFilledRelayRepository(DBSession)
+        self.across_v3_funds_deposited_repo = AcrossFundsDepositedRepository(DBSession)
         self.across_blockchain_transactions_repo = AcrossBlockchainTransactionRepository(DBSession)
         self.across_cross_chain_token_transfers_repo = AcrossCrossChainTransactionRepository(
             DBSession
@@ -128,77 +135,137 @@ class AcrossGenerator(BaseGenerator):
 
         self.across_cross_chain_token_transfers_repo.empty_table()
 
-        query = text(
-            """
-            INSERT INTO across_cross_chain_transactions (src_blockchain,
-                src_transaction_hash,
-                src_from_address,
-                src_to_address,
-                src_fee,
-                src_fee_usd,
-                src_timestamp,
-                dst_blockchain,
-                dst_transaction_hash,
-                dst_from_address,
-                dst_to_address,
-                dst_fee,
-                dst_fee_usd,
-                dst_timestamp,
-                deposit_id,
-                depositor,
-                recipient,
-                src_contract_address,
-                dst_contract_address,
-                input_amount,
-                input_amount_usd,
-                output_amount,
-                output_amount_usd,
-                quote_timestamp,
-                fill_deadline,
-                exclusivity_deadline,
-                exclusive_relayer,
-                fill_type
+        # Build the SELECT statement
+        deposit = aliased(AcrossFundsDeposited)
+        src_tx = aliased(AcrossBlockchainTransaction)
+        fill = aliased(AcrossFilledRelay)
+        dst_tx = aliased(AcrossBlockchainTransaction)
+
+        # Join tables
+        j1 = join(deposit, src_tx, deposit.transaction_hash == src_tx.transaction_hash)
+        j2 = join(
+            j1,
+            fill,
+            and_(
+                fill.deposit_id == deposit.deposit_id, fill.output_amount == deposit.output_amount
+            ),
+        )
+        j3 = join(j2, dst_tx, dst_tx.transaction_hash == fill.transaction_hash)
+
+        # Build the SELECT columns
+        select_stmt = (
+            select(
+                src_tx.blockchain.label("src_blockchain"),
+                src_tx.transaction_hash.label("src_transaction_hash"),
+                src_tx.from_address.label("src_from_address"),
+                src_tx.to_address.label("src_to_address"),
+                src_tx.fee.label("src_fee"),
+                null().label("src_fee_usd"),
+                src_tx.timestamp.label("src_timestamp"),
+                dst_tx.blockchain.label("dst_blockchain"),
+                dst_tx.transaction_hash.label("dst_transaction_hash"),
+                dst_tx.from_address.label("dst_from_address"),
+                dst_tx.to_address.label("dst_to_address"),
+                dst_tx.fee.label("dst_fee"),
+                null().label("dst_fee_usd"),
+                dst_tx.timestamp.label("dst_timestamp"),
+                null().label("refund_blockchain"),
+                null().label("refund_transaction_hash"),
+                null().label("refund_from_address"),
+                null().label("refund_to_address"),
+                null().label("refund_fee"),
+                null().label("refund_value"),
+                null().label("refund_fee_usd"),
+                null().label("refund_timestamp"),
+                deposit.deposit_id.label("intent_id"),
+                deposit.depositor.label("depositor"),
+                deposit.recipient.label("recipient"),
+                deposit.input_token.label("src_contract_address"),
+                fill.output_token.label("dst_contract_address"),
+                deposit.input_amount.label("input_amount"),
+                null().label("input_amount_usd"),
+                null().label("middle_src_token"),
+                null().label("middle_src_amount"),
+                null().label("middle_src_amount_usd"),
+                null().label("middle_dst_token"),
+                null().label("middle_dst_amount"),
+                null().label("middle_dst_amount_usd"),
+                deposit.output_amount.label("output_amount"),
+                null().label("output_amount_usd"),
+                deposit.quote_timestamp.label("quote_timestamp"),
+                deposit.fill_deadline.label("fill_deadline"),
+                deposit.exclusivity_deadline.label("exclusivity_deadline"),
+                deposit.exclusive_relayer.label("exclusive_relayer"),
+                fill.fill_type.label("fill_type"),
+                literal(0).label("native_fix_fee"),
+                null().label("native_fix_fee_usd"),
+                literal(0).label("percent_fee"),
+                null().label("percent_fee_usd"),
             )
-            SELECT
-                src_tx.blockchain,
-                src_tx.transaction_hash,
-                src_tx.from_address,
-                src_tx.to_address,
-                src_tx.fee,
-                NULL as src_fee_usd,
-                src_tx.timestamp,
-                dst_tx.blockchain,
-                dst_tx.transaction_hash,
-                dst_tx.from_address,
-                dst_tx.to_address,
-                dst_tx.fee,
-                NULL as dst_fee_usd,
-                dst_tx.timestamp,
-                deposit.deposit_id,
-                deposit.depositor,
-                deposit.recipient,
-                deposit.input_token,
-                fill.output_token,
-                deposit.input_amount,
-                NULL as input_amount_usd,
-                deposit.output_amount,
-                NULL as output_amount_usd,
-                deposit.quote_timestamp,
-                deposit.fill_deadline,
-                deposit.exclusivity_deadline,
-                deposit.exclusive_relayer,
-                fill.fill_type
-            FROM across_v3_funds_deposited deposit
-            JOIN across_blockchain_transactions src_tx ON src_tx.transaction_hash = deposit.transaction_hash
-            JOIN across_filled_v3_relay fill ON fill.deposit_id = deposit.deposit_id AND fill.output_amount = deposit.output_amount
-            JOIN across_blockchain_transactions dst_tx ON dst_tx.transaction_hash = fill.transaction_hash
-            WHERE deposit.destination_chain = dst_tx.blockchain
-            AND fill.src_chain = src_tx.blockchain;
-        """  # noqa: E501
+            .select_from(j3)
+            .where(
+                and_(
+                    deposit.destination_chain == dst_tx.blockchain,
+                    fill.src_chain == src_tx.blockchain,
+                )
+            )
+        )
+
+        # Build the INSERT statement
+        insert_stmt = insert(AcrossCrossChainTransaction).from_select(
+            [
+                "src_blockchain",
+                "src_transaction_hash",
+                "src_from_address",
+                "src_to_address",
+                "src_fee",
+                "src_fee_usd",
+                "src_timestamp",
+                "dst_blockchain",
+                "dst_transaction_hash",
+                "dst_from_address",
+                "dst_to_address",
+                "dst_fee",
+                "dst_fee_usd",
+                "dst_timestamp",
+                "refund_blockchain",
+                "refund_transaction_hash",
+                "refund_from_address",
+                "refund_to_address",
+                "refund_fee",
+                "refund_value",
+                "refund_fee_usd",
+                "refund_timestamp",
+                "intent_id",
+                "depositor",
+                "recipient",
+                "src_contract_address",
+                "dst_contract_address",
+                "input_amount",
+                "input_amount_usd",
+                "middle_src_token",
+                "middle_src_amount",
+                "middle_src_amount_usd",
+                "middle_dst_token",
+                "middle_dst_amount",
+                "middle_dst_amount_usd",
+                "output_amount",
+                "output_amount_usd",
+                "quote_timestamp",
+                "fill_deadline",
+                "exclusivity_deadline",
+                "exclusive_relayer",
+                "fill_type",
+                "native_fix_fee",
+                "native_fix_fee_usd",
+                "percent_fee",
+                "percent_fee_usd",
+            ],
+            select_stmt,
         )
 
         try:
-            self.across_cross_chain_token_transfers_repo.execute(query)
+            self.across_cross_chain_token_transfers_repo.execute(insert_stmt)
 
             size = self.across_cross_chain_token_transfers_repo.get_number_of_records()
 

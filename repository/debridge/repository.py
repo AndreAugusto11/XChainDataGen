@@ -3,7 +3,7 @@ from sqlalchemy import Index, func
 from repository.base import BaseRepository
 
 from .models import (
-    DeBridgeBlockchainTransaction,
+    DeBridgeBlockchainTransactions,
     DeBridgeClaimedUnlock,
     DeBridgeCreatedOrder,
     DeBridgeCrossChainTransactions,
@@ -11,21 +11,21 @@ from .models import (
 )
 
 
-class DeBridgeBlockchainTransactionRepository(BaseRepository):
+class DeBridgeBlockchainTransactionsRepository(BaseRepository):
     def __init__(self, session_factory):
-        super().__init__(DeBridgeBlockchainTransaction, session_factory)
+        super().__init__(DeBridgeBlockchainTransactions, session_factory)
 
     def get_transaction_by_hash(self, transaction_hash: str):
         with self.get_session() as session:
-            return session.get(DeBridgeBlockchainTransaction, transaction_hash)
+            return session.get(DeBridgeBlockchainTransactions, transaction_hash)
 
     def get_min_timestamp(self):
         with self.get_session() as session:
-            return session.query(func.min(DeBridgeBlockchainTransaction.timestamp)).scalar()
+            return session.query(func.min(DeBridgeBlockchainTransactions.timestamp)).scalar()
 
     def get_max_timestamp(self):
         with self.get_session() as session:
-            return session.query(func.max(DeBridgeBlockchainTransaction.timestamp)).scalar()
+            return session.query(func.max(DeBridgeBlockchainTransactions.timestamp)).scalar()
 
 
 class DeBridgeCreatedOrderRepository(BaseRepository):

@@ -103,6 +103,16 @@ class BaseHandler(ABC):
                     "fee": tx["meta"]["fee"],
                 }
             else:
+                input_data = tx["input"] if "input" in tx else None
+                if isinstance(input_data, bytes):
+                    input_data = input_data.hex()
+                elif hasattr(input_data, "hex"):  # HexBytes
+                    input_data = input_data.hex()
+
+                # Truncate to 35000 chars if needed
+                if len(input_data) > 35000:
+                    input_data = input_data[:35000]
+
                 return {
                     "blockchain": blockchain,
                     "transaction_hash": tx["transactionHash"],
@@ -112,7 +122,7 @@ class BaseHandler(ABC):
                     "to_address": tx["to"],
                     "status": int(tx["status"], 16),
                     "value": int(tx["value"], 16) if "value" in tx else None,
-                    "input_data": tx["input"][:35000] if "input" in tx else None,
+                    "input_data": input_data,
                     "fee": str(int(tx["gasUsed"], 0) * int(tx["effectiveGasPrice"], 0)),
                 }
         except Exception as e:
@@ -139,7 +149,7 @@ class BaseHandler(ABC):
                     new_tuple += (
                         (convert_bin_to_hex(val) if isinstance(val, (bytes, bytearray)) else val),
                     )
-                flattened.update(dict(zip(keys, new_tuple)))
+                flattened.update(dict(zip(keys, new_tuple, strict=False)))
             else:
                 flattened[key] = value
         return flattened

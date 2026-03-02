@@ -32,8 +32,8 @@ BLOCKCHAIN_IDS = {
     },
     "137": {
         "name": "polygon",
-        "native_token": "MATIC",
-        "native_token_contract": "0x0000000000000000000000000000000000001010",
+        "native_token": "POL",
+        "native_token_contract": "0x0000000000000000000000000000000000000000",
     },
     "1": {
         "name": "ethereum",

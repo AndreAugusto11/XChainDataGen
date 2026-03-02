@@ -457,6 +457,14 @@ class MayanHandler(BaseHandler):
                             transfer_instruction = transaction_instructions[idx - 1]
                         elif transaction_instructions[idx - 1]["name"] == "closeAccount":
                             transfer_instruction = transaction_instructions[idx - 2]
+                        elif transaction_instructions[idx - 2]["name"] == "transfer":
+                            transfer_instruction = transaction_instructions[idx - 2]
+                        elif transaction_instructions[idx - 4]["name"] == "closeAccount":
+                            transfer_instruction = transaction_instructions[idx - 4]
+                        elif transaction_instructions[idx - 4]["name"] == "transfer":
+                            transfer_instruction = transaction_instructions[idx - 4]
+                        elif transaction_instructions[idx - 3]["name"] == "transferChecked":
+                            transfer_instruction = transaction_instructions[idx - 3]
 
                         included = self.handle_init_order(
                             signature, transfer_instruction, instruction, swap_instruction
@@ -486,6 +494,8 @@ class MayanHandler(BaseHandler):
                         if transaction_instructions[idx - 2]["name"] == "transferChecked":
                             transfer_instruction = transaction_instructions[idx - 2]
                         elif transaction_instructions[idx - 1]["name"] == "transfer":
+                            transfer_instruction = transaction_instructions[idx - 1]
+                        elif transaction_instructions[idx - 1]["name"] == "transferChecked":
                             transfer_instruction = transaction_instructions[idx - 1]
 
                         included = self.handle_fulfill(
@@ -1032,6 +1042,8 @@ class MayanHandler(BaseHandler):
                     session.query(
                         MayanOrderFulfilled.key,
                         MayanOrderFulfilled.transaction_hash,
+                        MayanOrderFulfilled.middle_dst_token,
+                        MayanOrderFulfilled.middle_dst_amount,
                         MayanBlockchainTransaction.input_data,
                     )
                     .join(
@@ -1043,19 +1055,16 @@ class MayanHandler(BaseHandler):
                 )
 
             updates = []
-            for key, tx_hash, input_data in results:
+            for key, tx_hash, token, amount, input_data in results:
                 log_to_cli(
                     build_log_message_generator(
                         self.bridge,
-                        (
-                            f"Post-processing fulfill order: {key} -- Tx Hash: {tx_hash} "
-                            f" {len(updates) / len(results) * 100:.2f}% done...",
-                        ),
+                        (f"Post-processing fulfill order: {key} -- Tx Hash: {tx_hash} "),
                     ),
                     CliColor.INFO,
                 )
 
-                if not input_data:
+                if not input_data or token is not None or amount is not None:
                     continue
 
                 try:
@@ -1103,7 +1112,20 @@ class MayanHandler(BaseHandler):
                     continue
 
             # Batch update
-            for key, middle_token, middle_amount in updates:
+            total = len(updates)
+            for idx, (key, middle_token, middle_amount) in enumerate(updates):
+                # print progress
+                log_to_cli(
+                    build_log_message_generator(
+                        self.bridge,
+                        (
+                            f"Updating fulfill order info: {key} "
+                            f"-- {idx + 1}/{total} ({(idx + 1) / total * 100:.2f}%)",
+                        ),
+                    ),
+                    CliColor.INFO,
+                )
+
                 self.order_fulfilled_repo.update_middle_info_order_fulfilled(
                     key,
                     middle_token,
@@ -1124,6 +1146,7 @@ class MayanHandler(BaseHandler):
         if not swap or not isinstance(swap, list):
             return None
 
+        counter = 0
         while True:
             aggregated = MayanHandler.aggregate_swap_instructions(swap)
 
@@ -1134,6 +1157,11 @@ class MayanHandler(BaseHandler):
                 break
             else:
                 swap = resolved
+                counter += 1
+
+            if counter > 10:
+                # Prevent infinite loops. 10 iterations should be enough to resolve any swap chain.
+                break
 
         if len(resolved) == 1:
             item = resolved[0]

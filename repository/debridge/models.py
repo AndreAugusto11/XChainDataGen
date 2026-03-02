@@ -17,7 +17,7 @@ class DeBridgeCreatedOrder(Base):
     give_amount = Column(Numeric(30, 0), nullable=False)
     dst_blockchain = Column(String(10), nullable=False)
     take_token_address = Column(String(44), nullable=False)
-    take_amount = Column(Numeric(30, 0), nullable=False)
+    take_amount = Column(Numeric(50, 0), nullable=False)
     receiver_dst = Column(String(44), nullable=False)
     give_patch_authority_src = Column(String(44), nullable=False)
     order_authority_address_dst = Column(String(44), nullable=False)
@@ -28,12 +28,12 @@ class DeBridgeCreatedOrder(Base):
     affiliate_fee = Column(String, nullable=True)
     native_fix_fee = Column(Numeric(30, 0), nullable=True)
     percent_fee = Column(Numeric(30, 0), nullable=True)
-    referral_code = Column(Integer, nullable=False)
+    referral_code = Column(Integer, nullable=True)
     _metadata = Column(
         String, nullable=True
     )  # we added the underscore to avoid conflicts with the metadata column in the base class
     original_token = Column(String(44), nullable=True)
-    original_amount = Column(Numeric(30, 0), nullable=True)
+    original_amount = Column(Numeric(50, 0), nullable=True)
 
     def __init__(
         self,
@@ -128,7 +128,7 @@ class DeBridgeFulfilledOrder(Base):
     give_amount = Column(Numeric(30, 0), nullable=False)
     dst_blockchain = Column(String(10), nullable=False)
     take_token_address = Column(String(44), nullable=False)
-    take_amount = Column(Numeric(30, 0), nullable=False)
+    take_amount = Column(Numeric(50, 0), nullable=False)
     receiver_dst = Column(String(44), nullable=False)
     give_patch_authority_src = Column(String(44), nullable=False)
     order_authority_address_dst = Column(String(44), nullable=False)
@@ -140,7 +140,7 @@ class DeBridgeFulfilledOrder(Base):
     unlock_authority = Column(String(44), nullable=False)
     taker = Column(String(44), nullable=True)
     middle_dst_token = Column(String(44), nullable=True)
-    middle_dst_amount = Column(Numeric(30, 0), nullable=True)
+    middle_dst_amount = Column(Numeric(50, 0), nullable=True)
 
     def __init__(
         self,
@@ -252,8 +252,8 @@ class DeBridgeClaimedUnlock(Base):
         )
 
 
-class DeBridgeBlockchainTransaction(BlockchainTransaction):
-    __tablename__ = "debridge_blockchain_transaction"
+class DeBridgeBlockchainTransactions(BlockchainTransaction):
+    __tablename__ = "debridge_blockchain_transactions"
 
     def __repr__(self):
         return (
@@ -293,7 +293,7 @@ class DeBridgeCrossChainTransactions(Base):
     refund_from_address = Column(String(44), nullable=True)
     refund_to_address = Column(String(44), nullable=True)
     refund_fee = Column(Numeric(30, 0), nullable=True)
-    refund_value = Column(Numeric(30, 0), nullable=True)
+    refund_value = Column(Numeric(50, 0), nullable=True)
     refund_fee_usd = Column(Float, nullable=True)
     refund_timestamp = Column(BigInteger, nullable=True)
     intent_id = Column(String(64), nullable=False, primary_key=True)
@@ -301,17 +301,17 @@ class DeBridgeCrossChainTransactions(Base):
     recipient = Column(String(44), nullable=False)
     src_contract_address = Column(String(44), nullable=True)
     dst_contract_address = Column(String(44), nullable=True)
-    input_amount = Column(Numeric(30, 0), nullable=True)
+    input_amount = Column(Numeric(50, 0), nullable=True)
     input_amount_usd = Column(Float, nullable=True)
     middle_src_token = Column(String(44), nullable=True)
-    middle_src_amount = Column(Numeric(30, 0), nullable=True)
+    middle_src_amount = Column(Numeric(50, 0), nullable=True)
     middle_src_amount_usd = Column(Float, nullable=True)
     middle_dst_token = Column(String(44), nullable=True)
-    middle_dst_amount = Column(Numeric(30, 0), nullable=True)
+    middle_dst_amount = Column(Numeric(50, 0), nullable=True)
     middle_dst_amount_usd = Column(Float, nullable=True)
-    output_amount = Column(Numeric(30, 0), nullable=False)
+    output_amount = Column(Numeric(50, 0), nullable=False)
     output_amount_usd = Column(Float, nullable=True)
-    refund_amount = Column(Numeric(30, 0), nullable=True)
+    refund_amount = Column(Numeric(50, 0), nullable=True)
     refund_amount_usd = Column(Float, nullable=True)
     refund_token = Column(String(44), nullable=True)
     native_fix_fee = Column(Numeric(30, 0), nullable=False)

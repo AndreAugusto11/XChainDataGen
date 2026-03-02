@@ -75,6 +75,10 @@ class AcrossGenerator(BaseGenerator):
                 end_ts,
             )
 
+            # The Unichain blockchain is not supported by the Alchemy API, so we need to make some
+            # additions to the database manually
+            self.fetch_unichain_data(start_ts, end_ts)
+
             cctxs = self.across_cross_chain_token_transfers_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
@@ -312,6 +316,51 @@ class AcrossGenerator(BaseGenerator):
             ),
             CliColor.SUCCESS,
         )
+
+    def fetch_unichain_data(self, start_ts, end_ts):
+        if not self.native_token_repo.get_native_token_by_blockchain("unichain"):
+            self.native_token_repo.create(
+                {
+                    "symbol": "WETH",
+                    "blockchain": "unichain",
+                }
+            )
+
+        if not self.token_metadata_repo.get_token_metadata_by_symbol_and_blockchain(
+            "WETH", "unichain"
+        ):
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "WETH",
+                    "name": "Wrapped Ether",
+                    "decimals": 18,
+                    "blockchain": "unichain",
+                    "address": "0x4200000000000000000000000000000000000006",
+                }
+            )
+
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "WETH",
+                    "name": "Wrapped Ether",
+                    "decimals": 18,
+                    "blockchain": "unichain",
+                    "address": "0x0000000000000000000000000000000000000000",
+                }
+            )
+
+        if not self.token_metadata_repo.get_token_metadata_by_symbol_and_blockchain(
+            "USDC", "unichain"
+        ):
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "USDC",
+                    "name": "USD Coin",
+                    "decimals": 6,
+                    "blockchain": "unichain",
+                    "address": "0x078d782b760474a361dda0af3839290b0ef57ad6",
+                }
+            )
 
     def fix_token_symbol_clashes(self):
         """

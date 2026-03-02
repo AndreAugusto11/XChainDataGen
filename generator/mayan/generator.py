@@ -78,12 +78,12 @@ class MayanGenerator(BaseGenerator):
                 end_ts,
             )
 
+            cctxs = self.cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
+            self.populate_token_info_tables(cctxs, start_ts, end_ts)
+
             # The Solana blockchain is not supported by the Alchemy API, so we need to make some
             # additions to the database manually
             self.fetch_solana_data(start_ts, end_ts)
-
-            cctxs = self.cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
-            self.populate_token_info_tables(cctxs, start_ts, end_ts)
 
             PriceGenerator.calculate_cctx_usd_values(
                 self.bridge,
@@ -110,9 +110,9 @@ class MayanGenerator(BaseGenerator):
                 self.cross_chain_transactions_repo,
                 "mayan_cross_chain_transactions",
                 "refund_amount",
-                "src_blockchain",
-                "src_contract_address",
-                "src_timestamp",
+                "refund_blockchain",
+                "refund_token",
+                "refund_timestamp",
                 "refund_amount_usd",
             )
             PriceGenerator.calculate_cctx_usd_values(
@@ -437,7 +437,9 @@ class MayanGenerator(BaseGenerator):
                         Fwd.c.middle_src_token.label("middle_src_token"),
                         Fwd.c.middle_src_amount.label("middle_src_amount"),
                         literal(0).label("native_fix_fee"),
-                        literal(0).label("percent_fee"),
+                        (MayanFulfillOrder.amount * 0.000300090027 / (1 - 0.000300090027)).label(
+                            "percent_fee"
+                        ),
                     )
                     .join(
                         MayanOrderCreated,
@@ -508,7 +510,7 @@ class MayanGenerator(BaseGenerator):
                         # of fees), but there is not way to get the exact refund amount unless we
                         # parse internal transactions and match to the unlock events.
                         refund_amount_usd=None,
-                        refund_token="0x0000000000000000000000000000000000000000",
+                        refund_token=None,
                         auction_id=row.auction_id,
                         auction_first_bid_timestamp=row.auction_first_bid_timestamp,
                         auction_last_bid_timestamp=row.auction_last_bid_timestamp,
@@ -707,7 +709,7 @@ class MayanGenerator(BaseGenerator):
                         output_amount_usd=None,
                         refund_amount=row.input_amount,
                         refund_amount_usd=None,
-                        refund_token="0x0000000000000000000000000000000000000000",
+                        refund_token=None,
                         auction_id=row.auction_id,
                         auction_first_bid_timestamp=row.auction_first_bid_timestamp,
                         auction_last_bid_timestamp=row.auction_last_bid_timestamp,
@@ -717,6 +719,40 @@ class MayanGenerator(BaseGenerator):
                         percent_fee=row.percent_fee,
                         percent_fee_usd=None,
                     )
+                )
+
+            # identify duplicates by intent_id
+            original_count = len(cctxs)
+            unique_by_intent = {}
+            no_intent = []
+
+            def ts_key(obj):
+                # prefer dst_timestamp, then src_timestamp for determinism
+                return (obj.dst_timestamp or 0, obj.src_timestamp or 0)
+
+            for cctx in cctxs:
+                intent = getattr(cctx, "intent_id", None)
+                if intent is None:
+                    no_intent.append(cctx)
+                    continue
+
+                existing = unique_by_intent.get(intent)
+                if existing is None:
+                    unique_by_intent[intent] = cctx
+                else:
+                    # keep the one with the later dst_timestamp (fallback to src_timestamp)
+                    if ts_key(cctx) > ts_key(existing):
+                        unique_by_intent[intent] = cctx
+
+            cctxs = list(unique_by_intent.values()) + no_intent
+            removed = original_count - len(cctxs)
+            if removed:
+                log_to_cli(
+                    build_log_message_generator(
+                        self.bridge,
+                        f"Removed {removed} duplicate cross-chain transactions by intent_id.",
+                    ),
+                    CliColor.WARNING,
                 )
 
             self.cross_chain_transactions_repo.create_all(cctxs)
@@ -819,6 +855,26 @@ class MayanGenerator(BaseGenerator):
                 }
             )
 
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "SOL",
+                    "name": "Solana",
+                    "decimals": 9,
+                    "blockchain": "solana",
+                    "address": "So11111111111111111111111111111111111111112",
+                }
+            )
+
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "SOL",
+                    "name": "Solana",
+                    "decimals": 9,
+                    "blockchain": "solana",
+                    "address": "0x0000000000000000000000000000000000000000",
+                }
+            )
+
         # In Mayan, when the native token is used in the destination blockchain,
         # the address is set to 0x0000000000000000000000000000000000000000
         # however, if we fetch info from Alchemy, we will not get the
@@ -851,13 +907,28 @@ class MayanGenerator(BaseGenerator):
                 }
             )
 
-        if not PriceGenerator.is_token_price_complete(
+        if not self.token_metadata_repo.get_token_metadata_by_symbol_and_blockchain(
+            "USDT", "solana"
+        ):
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "USDT",
+                    "name": "USDT",
+                    "decimals": 6,
+                    "blockchain": "solana",
+                    "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+                }
+            )
+
+        completed, _ = PriceGenerator.is_token_price_complete(
             self.token_price_repo,
             start_ts,
             end_ts,
             "SOL",
-            "solana",
-        ):
+            "Solana",
+        )
+
+        if not completed:
             PriceGenerator.fetch_and_store_token_prices(
                 self.bridge,
                 self.token_price_repo,
@@ -865,9 +936,10 @@ class MayanGenerator(BaseGenerator):
                 end_ts,
                 "Solana",
                 "SOL",
+                None,
             )
 
-        # We found an erros in the Alchemy API where it returns the wrong
+        # We found an error in the Alchemy API where it returns the wrong
         # decimals for the DONKEY token in BNB, so we need to fix it manually
         with self.token_metadata_repo.get_session() as session:
             stmt = (
@@ -910,16 +982,83 @@ class MayanGenerator(BaseGenerator):
             )
             session.execute(stmt)
 
-        # Also, we need to fix the USD values of the 'Bitcoin on Base' token
-        # because it is not worth the same as BTC
+        # Also, we need to fix the USD values of the 'Bitcoin on Base' and
+        # 'Solana on Base' tokens because it is not worth the same as BTC.
+
+        # EDIT: we found more tokens with the same issue, so we need to fix them all.
+        # The common factor is that they all have the same symbol as a more popular token,
+        # but they are not the same token and have a much lower valuation, so we need to
+        # delete the USD values for all transactions involving these tokens.
+        # We should find a better solution for this in the future...
+
         with self.cross_chain_transactions_repo.get_session() as session:
             stmt = (
                 update(MayanCrossChainTransaction)
                 .where(
-                    MayanCrossChainTransaction.src_blockchain == "base",
-                    MayanCrossChainTransaction.src_contract_address
-                    == "0x0c41f1fc9022feb69af6dc666abfe73c9ffda7ce",
+                    MayanCrossChainTransaction.src_contract_address.in_(
+                        [
+                            "0x0c41f1fc9022feb69af6dc666abfe73c9ffda7ce",
+                            "0x0c41F1FC9022FEB69aF6dc666aBfE73C9FFDA7ce",
+                            "0x1986EF0cE0A7Fee7064137F00e7652f3E0bd35Ea",
+                            "0xf73338C9a944dC440c3315D3EDe8E5446C2e26dC",
+                            "0x3d5e487B21E0569048c4D1A60E98C36e1B09DB07",
+                            "0x72499bdDb67F4CA150E1f522Ca82c87bc9fB18c8",
+                            "0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7",
+                            "0xFe1EF2B469846D1832B25095ff51B004f090E0C6",
+                            "0x8479B19c5a3C43e024B2543582af0FC2fEf2E6A8",
+                            "0x08d426db68f92cf9327932a1cc561b525b7e3454",
+                            "0x59F4F336Bf3D0C49dBfbA4A74eBD2a6aCE40539A",
+                            "0x698DC45e4F10966f6D1D98e3bFd7071d8144C233",
+                            "0x52b492a33E447Cdb854c7FC19F1e57E8BfA1777D",
+                        ]
+                    )
                 )
-                .values(input_amount_usd=None, refund_fee_usd=None)
+                .values(input_amount_usd=None, refund_amount_usd=None)
+            )
+            session.execute(stmt)
+
+            stmt = (
+                update(MayanCrossChainTransaction)
+                .where(
+                    MayanCrossChainTransaction.dst_contract_address.in_(
+                        [
+                            "0x0c41f1fc9022feb69af6dc666abfe73c9ffda7ce",
+                            "0x0c41F1FC9022FEB69aF6dc666aBfE73C9FFDA7ce",
+                            "0x1986ef0ce0a7fee7064137f00e7652f3e0bd35ea",
+                            "0xf73338c9a944dc440c3315d3ede8e5446c2e26dc",
+                            "0x3d5e487B21E0569048c4D1A60E98C36e1B09DB07",
+                            "0x72499bdDb67F4CA150E1f522Ca82c87bc9fB18c8",
+                            "0xfca95aeb5bf44ae355806a5ad14659c940dc6bf7",
+                            "0xfe1ef2b469846d1832b25095ff51b004f090e0c6",
+                            "0x8479B19c5a3C43e024B2543582af0FC2fEf2E6A8",
+                            "0x08d426db68f92cf9327932a1cc561b525b7e3454",
+                            "0x420658a1d8b8f5c36ddaf1bb828f347ba9011969",
+                            "0xe83918ebc42583b4e9d5f5aa8280abcef8b6804c",
+                            "0x3d5e487b21e0569048c4d1a60e98c36e1b09db07",
+                            "0xc808f8baf0fbeb609ae3189bb4e14ab45ef75869",
+                            "0x72499bddb67f4ca150e1f522ca82c87bc9fb18c8",
+                            "0xaa390ee164e6a454609754bcc882760322fe8e3c",
+                            "0xf6da29a60e17081d80da142448de4438b74d20f9",
+                            "0x754188c92f5b4b23acaaaee3d3ea7400e0b6adcc",
+                            "0xb46584e0efde3092e04010a13f2eae62adb3b9f0",
+                            "0x698dc45e4f10966f6d1d98e3bfd7071d8144c233",
+                            "0x13375b79f3f1651ea317956686d2dcdf69e98ab1",
+                            "0x52b492a33e447cdb854c7fc19f1e57e8bfa1777d",
+                            "0xd7075f79df19c279ba5a9eb04a00474c43a3d73e",
+                            "0x9e1ead5f33cee7b0ec79537689f2c24711ff720b",
+                            "0xfdfff924c413a228c9fc62b1978ed8f755d81111",
+                            "0x5c9213bedcae6e7474e9ec6fa8a14978e3d363f1",
+                            "0x945cd29a40629ada610c2f6eba3f393756aa4444",
+                            "0xb043bad01195700e737d0aee852584eae9393134",
+                            "0x59f4f336bf3d0c49dbfba4a74ebd2a6ace40539a",
+                            "0xf73338c9a944dc440c3315d3ede8e5446c2e26dc",
+                            "0x08d426db68f92cf9327932a1cc561b525b7e3454",
+                            "0x1986ef0ce0a7fee7064137f00e7652f3e0bd35ea",
+                            "0x3d5e487b21e0569048c4d1a60e98c36e1b09db07",
+                            "0x8479b19c5a3c43e024b2543582af0fc2fef2e6a8",
+                        ]
+                    )
+                )
+                .values(output_amount_usd=None, percent_fee_usd=None)
             )
             session.execute(stmt)

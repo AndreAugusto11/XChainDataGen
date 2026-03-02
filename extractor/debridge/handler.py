@@ -6,12 +6,12 @@ from extractor.debridge.constants import BLOCKCHAIN_IDS, BRIDGE_CONFIG, SOLANA_P
 from extractor.mayan.handler import MayanHandler
 from repository.database import DBSession
 from repository.debridge.models import (
-    DeBridgeBlockchainTransaction,
+    DeBridgeBlockchainTransactions,
     DeBridgeCreatedOrder,
     DeBridgeFulfilledOrder,
 )
 from repository.debridge.repository import (
-    DeBridgeBlockchainTransactionRepository,
+    DeBridgeBlockchainTransactionsRepository,
     DeBridgeClaimedUnlockRepository,
     DeBridgeCreatedOrderRepository,
     DeBridgeFulfilledOrderRepository,
@@ -50,7 +50,7 @@ class DebridgeHandler(BaseHandler):
         )
 
     def bind_db_to_repos(self):
-        self.blockchain_transaction_repo = DeBridgeBlockchainTransactionRepository(DBSession)
+        self.blockchain_transaction_repo = DeBridgeBlockchainTransactionsRepository(DBSession)
         self.created_order_repo = DeBridgeCreatedOrderRepository(DBSession)
         self.fulfilled_order_repo = DeBridgeFulfilledOrderRepository(DBSession)
         self.claimed_unlock_repo = DeBridgeClaimedUnlockRepository(DBSession)
@@ -280,6 +280,9 @@ class DebridgeHandler(BaseHandler):
                 if instr["programId"] in self.get_solana_bridge_program_ids()
             ]
 
+            if debridge_instructions == []:
+                continue
+
             try:
                 for idx, instruction in debridge_instructions:
                     included = False
@@ -294,22 +297,19 @@ class DebridgeHandler(BaseHandler):
 
                         swap_instruction = MayanHandler.resolve_swaps(signature, swap_instructions)
 
-                        fee_transfer_instruction = None
+                        fee_transfer_instruction = transaction_instructions[idx]
                         i = 1
 
-                        while (
-                            fee_transfer_instruction is None
-                            or fee_transfer_instruction["name"] != "transfer"
-                        ):
+                        while fee_transfer_instruction["name"] != "transfer":
                             fee_transfer_instruction = transaction_instructions[idx + i]
                             i += 1
 
-                        transfer_instruction = None
+                        transfer_instruction = transaction_instructions[idx]
 
                         i = 6
                         while (
-                            transfer_instruction is None
-                            or transfer_instruction["name"] != "transfer"
+                            transfer_instruction["name"] != "transfer"
+                            and transfer_instruction["name"] != "transferChecked"
                         ):
                             transfer_instruction = transaction_instructions[idx + i]
                             i += 1
@@ -619,31 +619,30 @@ class DebridgeHandler(BaseHandler):
                     session.query(
                         DeBridgeFulfilledOrder.order_id,
                         DeBridgeFulfilledOrder.transaction_hash,
-                        DeBridgeBlockchainTransaction.input_data,
+                        DeBridgeFulfilledOrder.middle_dst_amount,
+                        DeBridgeFulfilledOrder.middle_dst_token,
+                        DeBridgeBlockchainTransactions.input_data,
                     )
                     .filter(DeBridgeFulfilledOrder.blockchain != "solana")
                     .join(
-                        DeBridgeBlockchainTransaction,
-                        DeBridgeBlockchainTransaction.transaction_hash
+                        DeBridgeBlockchainTransactions,
+                        DeBridgeBlockchainTransactions.transaction_hash
                         == DeBridgeFulfilledOrder.transaction_hash,
                     )
                     .all()
                 )
 
             updates = []
-            for order_id, tx_hash, input_data in results:
+            for order_id, tx_hash, middle_amount, middle_token, input_data in results:
                 log_to_cli(
                     build_log_message_generator(
                         self.bridge,
-                        (
-                            f"Post-processing fulfill order: {order_id} -- Tx Hash: {tx_hash} "
-                            f" {len(updates) / len(results) * 100:.2f}% done...",
-                        ),
+                        (f"Post-processing fulfill order: {order_id} -- Tx Hash: {tx_hash} "),
                     ),
                     CliColor.INFO,
                 )
 
-                if not input_data:
+                if not input_data or middle_amount is not None or middle_token is not None:
                     continue
 
                 try:
@@ -656,7 +655,13 @@ class DebridgeHandler(BaseHandler):
                         amount_in = int(input_data[74:138], 16)
 
                         updates.append((order_id, token_in, amount_in))
+                    elif (
+                        function_selector == "0x6b3ec416"  # cross(tuple desc)
+                    ):
+                        token_in = unpad_address(input_data[64:128])
+                        amount_in = int(input_data[320:384], 16)
 
+                        updates.append((order_id, token_in, amount_in))
                     elif (
                         function_selector == "0xb9303701" or function_selector == "0xc358547e"
                     ):  # createSaltedOrder or fulfillOrder
@@ -687,7 +692,20 @@ class DebridgeHandler(BaseHandler):
                     continue
 
             # Batch update
-            for order_id, middle_token, middle_amount in updates:
+            total = len(updates)
+            for idx, (order_id, middle_token, middle_amount) in enumerate(updates):
+                # print progress
+                log_to_cli(
+                    build_log_message_generator(
+                        self.bridge,
+                        (
+                            f"Updating fulfill order info: {order_id} "
+                            f"-- {idx + 1}/{total} ({(idx + 1) / total * 100:.2f}%)",
+                        ),
+                    ),
+                    CliColor.INFO,
+                )
+
                 self.fulfilled_order_repo.update_middle_info_order_fulfilled(
                     order_id,
                     middle_token,
@@ -700,31 +718,30 @@ class DebridgeHandler(BaseHandler):
                     session.query(
                         DeBridgeCreatedOrder.order_id,
                         DeBridgeCreatedOrder.transaction_hash,
-                        DeBridgeBlockchainTransaction.input_data,
+                        DeBridgeCreatedOrder.original_amount,
+                        DeBridgeCreatedOrder.original_token,
+                        DeBridgeBlockchainTransactions.input_data,
                     )
                     .filter(DeBridgeCreatedOrder.blockchain != "solana")
                     .join(
-                        DeBridgeBlockchainTransaction,
-                        DeBridgeBlockchainTransaction.transaction_hash
+                        DeBridgeBlockchainTransactions,
+                        DeBridgeBlockchainTransactions.transaction_hash
                         == DeBridgeCreatedOrder.transaction_hash,
                     )
                     .all()
                 )
 
             updates = []
-            for order_id, tx_hash, input_data in results:
+            for order_id, tx_hash, amount, token, input_data in results:
                 log_to_cli(
                     build_log_message_generator(
                         self.bridge,
-                        (
-                            f"Post-processing fulfill order: {order_id} -- Tx Hash: {tx_hash} "
-                            f" {len(updates) / len(results) * 100:.2f}% done...",
-                        ),
+                        (f"Post-processing created order: {order_id} -- Tx Hash: {tx_hash} "),
                     ),
                     CliColor.INFO,
                 )
 
-                if not input_data:
+                if not input_data or amount is not None or token is not None:
                     continue
 
                 try:
@@ -735,6 +752,37 @@ class DebridgeHandler(BaseHandler):
                     ):  # strictlySwapAndCall or strictlySwapAndCallDln
                         token_in = unpad_address(input_data[10:74])
                         amount_in = int(input_data[74:138], 16)
+
+                        updates.append((order_id, token_in, amount_in))
+                    elif (
+                        function_selector == "0x6b3ec416"  # cross(tuple desc)
+                    ):
+                        token_in = unpad_address(input_data[64:128])
+                        amount_in = int(input_data[320:384], 16)
+
+                        updates.append((order_id, token_in, amount_in))
+                    elif (
+                        function_selector == "0xfbe16ca7"
+                    ):  # createOrder((address,uint256,bytes,uint256,uint256,bytes,address,bytes,bytes,bytes,bytes), bytes, uint32, bytes)  # noqa: E501
+                        token_in = unpad_address(input_data[266:330])
+                        amount_in = int(input_data[330:394], 16)
+
+                        updates.append((order_id, token_in, amount_in))
+
+                    elif (
+                        function_selector == "0xe2216330"
+                    ):  # swap((address,uint256,address,uint256,bool,bytes,bytes)[], address, uint256, uint256)  # noqa: E501
+                        amount_in = int(input_data[458:522], 16)
+                        token_in = unpad_address(input_data[522:586])
+
+                        updates.append((order_id, token_in, amount_in))
+
+                    elif (
+                        function_selector
+                        == "0x3ce33bff"  # bridge(string adapterId,address srcToken,uint256 amount,bytes data)  # noqa: E501
+                    ):
+                        token_in = unpad_address(input_data[75:139])
+                        amount_in = int(input_data[139:202], 16)
 
                         updates.append((order_id, token_in, amount_in))
 
@@ -768,7 +816,20 @@ class DebridgeHandler(BaseHandler):
                     continue
 
             # Batch update
-            for order_id, middle_token, middle_amount in updates:
+            total = len(updates)
+            for idx, (order_id, middle_token, middle_amount) in enumerate(updates, start=1):
+                # print progress
+                log_to_cli(
+                    build_log_message_generator(
+                        self.bridge,
+                        (
+                            f"Updating created order info: {order_id} "
+                            f"-- {idx}/{total} ({idx / total * 100:.2f}%)",
+                        ),
+                    ),
+                    CliColor.INFO,
+                )
+
                 self.created_order_repo.update_middle_info_order_fulfilled(
                     order_id,
                     middle_token,

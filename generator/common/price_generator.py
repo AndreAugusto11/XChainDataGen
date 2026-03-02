@@ -81,6 +81,9 @@ class PriceGenerator:
                         None,
                     )
 
+                    if token_metadata is None:
+                        continue
+
                     name = token_metadata["name"]
 
                 completed, dates = PriceGenerator.is_token_price_complete(

@@ -14,13 +14,14 @@ from repository.common.repository import (
 )
 from repository.database import DBSession
 from repository.debridge.models import (
-    DeBridgeBlockchainTransaction,
+    DeBridgeBlockchainTransactions,
     DeBridgeClaimedUnlock,
     DeBridgeCreatedOrder,
+    DeBridgeCrossChainTransactions,
     DeBridgeFulfilledOrder,
 )
 from repository.debridge.repository import (
-    DeBridgeBlockchainTransactionRepository,
+    DeBridgeBlockchainTransactionsRepository,
     DeBridgeClaimedUnlockRepository,
     DeBridgeCreatedOrderRepository,
     DeBridgeCrossChainTransactionsRepository,
@@ -44,7 +45,7 @@ class DebridgeGenerator(BaseGenerator):
         self.price_generator = PriceGenerator()
 
     def bind_db_to_repos(self):
-        self.transactions_repo = DeBridgeBlockchainTransactionRepository(DBSession)
+        self.transactions_repo = DeBridgeBlockchainTransactionsRepository(DBSession)
         self.created_orders_repo = DeBridgeCreatedOrderRepository(DBSession)
         self.fulfilled_orders_repo = DeBridgeFulfilledOrderRepository(DBSession)
         self.claimed_unlock_repo = DeBridgeClaimedUnlockRepository(DBSession)
@@ -77,10 +78,10 @@ class DebridgeGenerator(BaseGenerator):
                 end_ts,
             )
 
-            self.fetch_solana_data(start_ts, end_ts)
-
             cctxs = self.debridge_cross_chain_transactions_repo.get_unique_src_dst_contract_pairs()
             self.populate_token_info_tables(cctxs, start_ts, end_ts)
+
+            self.fetch_solana_data(start_ts, end_ts)
 
             self.fill_null_address_tokens()
 
@@ -111,9 +112,9 @@ class DebridgeGenerator(BaseGenerator):
                 self.debridge_cross_chain_transactions_repo,
                 "debridge_cross_chain_transactions",
                 "refund_amount",
-                "src_blockchain",
-                "src_contract_address",
-                "src_timestamp",
+                "refund_blockchain",
+                "refund_token",
+                "refund_timestamp",
                 "refund_amount_usd",
             )
             PriceGenerator.calculate_cctx_usd_values(
@@ -184,6 +185,8 @@ class DebridgeGenerator(BaseGenerator):
                 "native_fix_fee_usd",
             )
 
+            self.fix_token_symbol_clashes()
+
         except Exception as e:
             exception = CustomException(
                 self.CLASS_NAME,
@@ -207,9 +210,9 @@ class DebridgeGenerator(BaseGenerator):
         try:
             results = []
 
-            SrcTx = aliased(DeBridgeBlockchainTransaction)
-            DstTx = aliased(DeBridgeBlockchainTransaction)
-            RefundTx = aliased(DeBridgeBlockchainTransaction)
+            SrcTx = aliased(DeBridgeBlockchainTransactions)
+            DstTx = aliased(DeBridgeBlockchainTransactions)
+            RefundTx = aliased(DeBridgeBlockchainTransactions)
 
             with self.debridge_cross_chain_transactions_repo.get_session() as session:
                 # Merge CreatedOrder with BlockchainTransaction by transaction_hash
@@ -251,7 +254,7 @@ class DebridgeGenerator(BaseGenerator):
                         DeBridgeCreatedOrder.order_id.label("intent_id"),
                         DeBridgeCreatedOrder.maker_src.label("depositor"),
                         DeBridgeFulfilledOrder.receiver_dst.label("recipient"),
-                        DeBridgeFulfilledOrder.give_token_address.label("src_contract_address"),
+                        DeBridgeCreatedOrder.original_token.label("src_contract_address"),
                         DeBridgeFulfilledOrder.take_token_address.label("dst_contract_address"),
                         DeBridgeCreatedOrder.original_amount.label("input_amount"),
                         literal(None).label("input_amount_usd"),
@@ -329,9 +332,9 @@ class DebridgeGenerator(BaseGenerator):
         try:
             results = []
 
-            SrcTx = aliased(DeBridgeBlockchainTransaction)
-            DstTx = aliased(DeBridgeBlockchainTransaction)
-            RefundTx = aliased(DeBridgeBlockchainTransaction)
+            SrcTx = aliased(DeBridgeBlockchainTransactions)
+            DstTx = aliased(DeBridgeBlockchainTransactions)
+            RefundTx = aliased(DeBridgeBlockchainTransactions)
 
             with self.debridge_cross_chain_transactions_repo.get_session() as session:
                 results = (
@@ -365,7 +368,7 @@ class DebridgeGenerator(BaseGenerator):
                         DeBridgeFulfilledOrder.order_id.label("intent_id"),
                         DeBridgeCreatedOrder.maker_src.label("depositor"),
                         DeBridgeCreatedOrder.receiver_dst.label("recipient"),
-                        DeBridgeCreatedOrder.give_token_address.label("src_contract_address"),
+                        DeBridgeCreatedOrder.original_token.label("src_contract_address"),
                         DeBridgeCreatedOrder.take_token_address.label("dst_contract_address"),
                         DeBridgeCreatedOrder.original_amount.label("input_amount"),
                         literal(None).label("input_amount_usd"),
@@ -407,6 +410,10 @@ class DebridgeGenerator(BaseGenerator):
                         DeBridgeClaimedUnlock.transaction_hash == RefundTx.transaction_hash,
                     )
                     .filter(SrcTx.blockchain == "solana")
+                    .filter(DstTx.blockchain != "solana")
+                    .filter(
+                        DeBridgeCreatedOrder.dst_blockchain == DeBridgeFulfilledOrder.blockchain
+                    )
                     .all()
                 )
 
@@ -520,11 +527,13 @@ class DebridgeGenerator(BaseGenerator):
                 }
             )
 
-        if not self.token_metadata_repo.get_token_metadata_by_symbol("SOL"):
+        if not self.token_metadata_repo.get_token_metadata_by_symbol_and_blockchain(
+            "SOL", "solana"
+        ):
             self.token_metadata_repo.create(
                 {
                     "symbol": "SOL",
-                    "name": "Wrapped Solana",
+                    "name": "Solana",
                     "decimals": 9,
                     "blockchain": "solana",
                     "address": "11111111111111111111111111111111",
@@ -534,7 +543,17 @@ class DebridgeGenerator(BaseGenerator):
             self.token_metadata_repo.create(
                 {
                     "symbol": "SOL",
-                    "name": "Wrapped Solana",
+                    "name": "Solana",
+                    "decimals": 9,
+                    "blockchain": "solana",
+                    "address": "So11111111111111111111111111111111111111112",
+                }
+            )
+
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "SOL",
+                    "name": "Solana",
                     "decimals": 9,
                     "blockchain": "solana",
                     "address": "0x0000000000000000000000000000000000000000",
@@ -573,13 +592,28 @@ class DebridgeGenerator(BaseGenerator):
                 }
             )
 
-        if not PriceGenerator.is_token_price_complete(
+        if not self.token_metadata_repo.get_token_metadata_by_symbol_and_blockchain(
+            "USDT", "solana"
+        ):
+            self.token_metadata_repo.create(
+                {
+                    "symbol": "USDT",
+                    "name": "USDT",
+                    "decimals": 6,
+                    "blockchain": "solana",
+                    "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+                }
+            )
+
+        completed, _ = PriceGenerator.is_token_price_complete(
             self.token_price_repo,
             start_ts,
             end_ts,
             "SOL",
             "solana",
-        ):
+        )
+
+        if not completed:
             PriceGenerator.fetch_and_store_token_prices(
                 self.bridge,
                 self.token_price_repo,
@@ -601,5 +635,55 @@ class DebridgeGenerator(BaseGenerator):
                     TokenMetadata.address == "0xA49fA5E8106E2d6d6a69E78df9B6A20AaB9c4444",
                 )
                 .execution_options(synchronize_session=False)
+            )
+            session.execute(stmt)
+
+        # We found an error in the Alchemy API where it returns the wrong
+        # decimals for the MYX token in BNB, so we need to fix it manually
+        with self.token_metadata_repo.get_session() as session:
+            stmt = (
+                update(TokenMetadata)
+                .values(decimals=18)
+                .where(
+                    TokenMetadata.blockchain == "bnb",
+                    TokenMetadata.symbol == "MYX",
+                    TokenMetadata.address == "0xd82544bf0dfe8385ef8fa34d67e6e4940cc63e16",
+                )
+                .execution_options(synchronize_session=False)
+            )
+            session.execute(stmt)
+
+            session.query(TokenMetadata).filter(
+                TokenMetadata.address == "0x420658a1d8b8f5c36ddaf1bb828f347ba9011969"
+            ).delete(synchronize_session=False)
+
+            session.query(TokenMetadata).filter(
+                TokenMetadata.address == "0x0db510e79909666d6dec7f5e49370838c16d950f"
+            ).delete(synchronize_session=False)
+
+            session.query(TokenMetadata).filter(
+                TokenMetadata.address == "0x96fb784986284cb6d4a8da6dd50dd7e85ef38f5d"
+            ).delete(synchronize_session=False)
+
+    def fix_token_symbol_clashes(self):
+        log_to_cli(
+            build_log_message_generator(
+                self.bridge, "Fixing token symbol clashes in Debridge cross-chain transactions..."
+            )
+        )
+
+        with self.debridge_cross_chain_transactions_repo.get_session() as session:
+            stmt = (
+                update(DeBridgeCrossChainTransactions)
+                .where(
+                    DeBridgeCrossChainTransactions.dst_contract_address.in_(
+                        [
+                            "0x005e6fd1610302018dcd9caf29b8bc38ff6efd98",
+                            "0xd7075f79df19c279ba5a9eb04a00474c43a3d73e",
+                            "0xb33d999469a7e6b9ebc25a3a05248287b855ed46",
+                        ]
+                    )
+                )
+                .values(output_amount_usd=None, percent_fee_usd=None)
             )
             session.execute(stmt)

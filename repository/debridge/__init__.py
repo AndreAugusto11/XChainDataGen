@@ -1,5 +1,5 @@
 from .repository import (
-    DeBridgeBlockchainTransactionRepository,
+    DeBridgeBlockchainTransactionsRepository,
     DeBridgeClaimedUnlockRepository,
     DeBridgeCreatedOrderRepository,
     DeBridgeCrossChainTransactionsRepository,
@@ -7,7 +7,7 @@ from .repository import (
 )
 
 __all__ = [
-    "DeBridgeBlockchainTransactionRepository",
+    "DeBridgeBlockchainTransactionsRepository",
     "DeBridgeCreatedOrderRepository",
     "DeBridgeFulfilledOrderRepository",
     "DeBridgeClaimedUnlockRepository",

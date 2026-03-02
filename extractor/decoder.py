@@ -132,7 +132,7 @@ class BridgeDecoder:
 
             normalized = map_abi_data(BASE_RETURN_NORMALIZERS, types, decoded)
 
-            return dict(zip(names, normalized))
+            return dict(zip(names, normalized, strict=False))
         except Exception as e:
             raise CustomException(
                 self.CLASS_NAME,

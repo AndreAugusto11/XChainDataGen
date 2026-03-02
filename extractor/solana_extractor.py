@@ -59,6 +59,11 @@ class SolanaExtractor(Extractor):
         decoded_instructions = []
         for signature in signatures:
             try:
+                exists = self.handler.does_transaction_exist_by_hash(signature)
+
+                if exists:
+                    continue
+
                 decoded_tx = self.rpc_client.parseTransactionByHash(signature)
 
                 decoded_instructions.append(decoded_tx)
@@ -112,20 +117,33 @@ class SolanaExtractor(Extractor):
                 )
             )
 
+            # if we already have signatures fetched, we can skip fetching them again
+            # and we can load them from a file
+
             all_signatures = self.rpc_client.get_all_signatures_for_address(
                 program_id, start_signature, end_signature
             )
 
-            # if we already have signatures fetched, we can skip fetching them again
+            all_signatures = list(map(lambda x: x["signature"], all_signatures))
+
+            # store all signatures to a file for future reference
+            with open(f"extractor/solana_{program_id}_signatures.txt", "w") as f:
+                for signature in all_signatures:
+                    f.write(f"{signature}\n")
+
+            # if we want to load signatures from a file instead of fetching them again, we can
+            # uncomment the following code
+
             # all_signatures = []
-            # with open("extractor/db_out.txt", "r") as f:
+            # with open(f"extractor/solana_{program_id}_signatures.txt", "r") as f:
             #     # each line is a tx_hash / signature
             #     for line in f:
             #         tx_hash = line.strip()
             #         if tx_hash:
             #             all_signatures.append(tx_hash)
 
-            all_signatures = list(map(lambda x: x["signature"], all_signatures))
+            # ensure no duplicates
+            all_signatures = list(set(all_signatures))
 
             if not all_signatures:
                 log_to_cli(

@@ -110,7 +110,7 @@ class BaseHandler(ABC):
                     input_data = input_data.hex()
 
                 # Truncate to 35000 chars if needed
-                if len(input_data) > 35000:
+                if input_data and len(input_data) > 35000:
                     input_data = input_data[:35000]
 
                 return {

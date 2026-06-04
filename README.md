@@ -1,13 +1,13 @@
 <h2><center>XChainDataGen: A Cross-Chain Dataset Generation Framework</center></h2>
 
 <span><center>[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.7+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/release/python-3110/) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/AndreAugusto11/XChainWatcher/blob/main/CONTRIBUTING.md) </center></span>
+[![Python 3.7+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/release/python-3110/) </center></span>
 
 This repository contains the code for XChainDataGen, a cross-chain dataset extraction and generation framework -- i.e., a tool that **extracts** cross-chain data from bridge contracts in multiple blockchains and **generates** datasets of cross-chain transactions (CCTX).
 
-📄 Paper: [https://arxiv.org/abs/2503.13637](https://arxiv.org/abs/2503.13637)
+📄 Paper: TBD
 
-📈 Dataset (Jun 2024 - Dec 2024): [https://zenodo.org/records/15341722](https://zenodo.org/records/15341722)
+📈 Dataset: TBD
 
 
 ### Project structure
